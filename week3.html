@@ -278,6 +278,50 @@
             .image-row .screen-image {
                 flex: 0 0 260px;
             }
+
+            /* Chapter 3: current Firestore hierarchy */
+            #chapter3 .db-progress {
+                display: inline-block; padding: 3px 12px; margin-bottom: 12px;
+                border: 1px solid #dccb99; border-radius: 20px;
+                background: #fff9eb; color: #786026; font-size: 15px; font-weight: 650;
+            }
+            #chapter3 .db-legend { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 15px; margin: 20px 0; }
+            #chapter3 .db-tag { display: inline-block; font-size: 12px; padding: 1px 7px; border-radius: 4px; margin-right: 7px; vertical-align: middle; }
+            #chapter3 .db-collection { background: #e9eff7; color: #3e628b; }
+            #chapter3 .db-document { background: #edf4f0; color: #39705c; }
+            #chapter3 .db-field { background: #f2edf6; color: #79588a; }
+            #chapter3 .db-root { border: 1px solid #bccbd9; padding: 18px 22px; background: #f6f8fb; border-radius: 8px; }
+            #chapter3 .db-root strong { display: block; font-size: 21px; }
+            #chapter3 .db-root span { font-size: 15px; color: #64707a; }
+            #chapter3 .db-topline { margin: 0 0 0 24px; padding: 12px 0 12px 22px; border-left: 2px solid #bccbd9; color: #64707a; font-size: 15px; }
+            #chapter3 .db-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 20px; }
+            #chapter3 .db-card { min-width: 0; border: 1px solid #dbe0e5; border-radius: 8px; padding: 20px; break-inside: avoid; }
+            #chapter3 .db-card:first-child { grid-column: 1 / -1; }
+            #chapter3 .db-card h4 { margin: 0 0 3px; font-size: 20px; line-height: 1.5; }
+            #chapter3 .db-purpose { margin: 0 0 12px; color: #64707a; font-size: 16px; }
+            #chapter3 .db-branch { position: relative; margin-left: 9px; border-left: 2px solid #dbe0e5; padding: 6px 0 6px 20px; }
+            #chapter3 .db-branch::before { content: ''; position: absolute; top: 23px; left: 0; width: 12px; border-top: 2px solid #dbe0e5; }
+            #chapter3 .db-node { line-height: 1.6; font-size: 16px; }
+            #chapter3 .db-fields { margin: 6px 0 9px; color: #64707a; font-size: 14px; line-height: 1.7; }
+            #chapter3 .db-children { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin-top: 12px; }
+            #chapter3 .db-children .db-branch { margin-left: 0; }
+            #chapter3 figure { margin: 24px 0 28px; }
+            #chapter3 figcaption { color: #64707a; font-size: 14px; margin-top: 14px; }
+            #chapter3 .db-notes { padding-left: 24px; font-size: 17px; }
+            #chapter3 .db-notes li { margin-bottom: 10px; }
+            #chapter3 .db-scope { border-left: 3px solid #a8b1ba; padding-left: 18px; font-size: 16px; margin: 24px 0; }
+            #chapter3 .db-sources { font-size: 14px; color: #64707a; }
+            @media(max-width:700px) {
+                #chapter3 .db-grid, #chapter3 .db-children { grid-template-columns: 1fr; }
+                #chapter3 .db-card { padding: 16px; }
+                #chapter3 .db-card h4 { font-size: 18px; }
+            }
+            @media print {
+                #chapter3 .db-grid { display: block; }
+                #chapter3 .db-card { margin-bottom: 12px; }
+                #chapter3 .db-card h4 { font-size: 13pt; }
+                #chapter3 .db-fields, #chapter3 .db-node { font-size: 10pt; }
+            }
         </style>
     </head>
     <body id="top">
@@ -293,6 +337,7 @@
             <nav aria-label="챕터 이동">
                 <a href="#chapter1">1. 파일 구조</a>
                 <a href="#chapter2">2. 앱 실행과 화면별 기능</a>
+                <a href="#chapter3">3. Firebase 데이터 구조 분석</a>
             </nav>
             <hr>
             <section id="chapter1">
@@ -783,6 +828,65 @@
                         </li>
                     </ul>
                 </article>
+            </section>
+
+            <hr>
+            <section id="chapter3" aria-labelledby="database-title">
+                <span class="db-progress">진행 중 · 데이터베이스 구조 분석</span>
+                <h2 id="database-title">3. Firebase 데이터 구조 분석</h2>
+                <p class="intro">현재 ShareFit에서 사용하는 컬렉션, 문서, 하위 컬렉션의 저장 구조를 분석하고 있습니다.</p>
+                <div class="db-scope">코드에서 확인한 저장 경로를 기준으로 정리했습니다. 실제 Firebase 콘솔의 저장 데이터와 대조하는 작업은 남아 있습니다.</div>
+                <div class="db-legend" aria-label="구조도 범례">
+                    <span><span class="db-tag db-collection">컬렉션</span>문서를 모아두는 공간</span>
+                    <span><span class="db-tag db-document">문서</span>데이터 한 건</span>
+                    <span>들여쓴 연결선 = 문서 아래의 하위 컬렉션</span>
+                </div>
+                <figure aria-label="현재 ShareFit Firestore 데이터 구조도">
+                    <div class="db-root"><strong>Cloud Firestore · ShareFit</strong><span>프로젝트: sharefit-3d0b0</span></div>
+                    <div class="db-topline">코드에서 확인한 최상위 컬렉션 9개 · 아래 9개 상자는 모두 같은 최상위 수준</div>
+                    <div class="db-grid"><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>users</code></h4><p class="db-purpose">개인 회원 정보와 사용자별 하위 데이터</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{uid}</code></div><p class="db-fields">uid · email · name · friendCode · friendCount · createdAt<br>experienceStartDate · notificationPreferences 등 주요 필드</p><div class="db-children"><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>friends</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{friendUid}</code></div><p class="db-fields">friendUid · requestId · createdAt<br>친구 관계를 양쪽 사용자 아래에 각각 저장</p></div></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>workouts</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{workoutId}</code></div><p class="db-fields">userId · type · status · startedAt · endedAt · durationSeconds<br>strength / running · 사진 URL·생성·만료 시각</p></div></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>fcmTokens</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{tokenId}</code></div><p class="db-fields">token · platform · createdAt · updatedAt<br>알림을 받을 기기 토큰</p></div></div></div></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>publicProfiles</code></h4><p class="db-purpose">다른 사용자에게 보여줄 프로필</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{uid}</code></div><p class="db-fields">uid · name · friendCode · active<br>experienceStartDate · profileTitleId · profileThemeId · updatedAt</p></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>friendCodes</code></h4><p class="db-purpose">친구 코드로 사용자 UID 찾기</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{code}</code></div><p class="db-fields">uid · active · createdAt</p></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>friendRequests</code></h4><p class="db-purpose">친구 요청과 수락 상태</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{pairId}</code></div><p class="db-fields">fromUid · toUid · status · createdAt · updatedAt<br>pairId: 두 UID를 정렬해 결합 · pending → accepted</p></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>publicActivity</code></h4><p class="db-purpose">홈에 표시할 현재·최근 운동 상태</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{uid}</code></div><p class="db-fields">uid · status · workoutType · startedAt · endedAt<br>durationSeconds · lastWorkoutAt · strengthSummary · runningSummary<br>사진 URL·생성·만료 시각 · updatedAt</p></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>publicWorkoutActivities</code></h4><p class="db-purpose">친구에게 보여줄 날짜별 운동 기록</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{uid}</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>days</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{dateKey}</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>workouts</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{workoutId}</code></div><p class="db-fields">uid · workoutId · dateKey · type · 운동 시각·시간<br>strengthSummary · runningSummary · 사진 정보<br>개인 원본과 같은 workoutId 사용</p></div></div></div></div></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>publicWorkoutStats</code></h4><p class="db-purpose">랭킹 조회용 날짜별 운동 합계</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{uid}</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>days</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{dateKey}</code></div><p class="db-fields">uid · dateKey · workoutCount · durationSeconds<br>strengthVolumeKg · runningDistanceMeters · updatedAt</p></div></div></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>notificationEvents</code></h4><p class="db-purpose">서버의 친구 요청·수락 알림 중복 처리 방지</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{eventId}</code></div><p class="db-fields">createdAt<br>Cloud Functions에서 관리하는 처리 표시</p></div></div><div class="db-card"><h4><span class="db-tag db-collection">컬렉션</span><code>notificationCooldowns</code></h4><p class="db-purpose">같은 친구에게 보내는 깨우기 간격 관리</p><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{senderUid}</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-collection">컬렉션</span><code>targets</code></div><div class="db-branch"><div class="db-node"><span class="db-tag db-document">문서</span><code>{targetUid}</code></div><p class="db-fields">senderUid · targetUid · lastSentAt · requestId</p></div></div></div></div></div>
+                    <figcaption>{uid}: 사용자 ID · {workoutId}: 운동 기록 ID · {dateKey}: 한국 시간 기준 운동 종료일(YYYY-MM-DD). 선은 저장 경로의 계층을 나타냅니다. 중간 문서는 하위 컬렉션의 경로로만 사용되어 자체 필드가 없을 수도 있습니다.</figcaption>
+                </figure>
+                <h3>운동 기록 문서 내부</h3>
+                <p class="intro"><code>users/{uid}/workouts/{workoutId}</code> 안에는 헬스·러닝 상세가 필드로 저장됩니다. 아래 항목은 하위 컬렉션이 아닙니다.</p>
+                <div class="db-grid">
+                    <div class="db-card" style="grid-column:auto">
+                        <h4><span class="db-tag db-field">필드</span><code>strength</code> · Map</h4>
+                        <p class="db-purpose">헬스 운동 상세</p>
+                        <div class="db-branch">
+                            <div class="db-node"><code>bodyParts[]</code> · 운동 부위 목록</div>
+                            <div class="db-node"><code>exercises[]</code> · 종목 목록</div>
+                            <div class="db-branch">
+                                <div class="db-node"><code>name</code> · 종목 이름</div>
+                                <div class="db-node"><code>sets[]</code> · 세트 목록</div>
+                                <div class="db-branch"><div class="db-node"><code>weightKg</code> · 중량<br><code>reps</code> · 반복 횟수</div></div>
+                            </div>
+                            <div class="db-node"><code>completedSetCount</code> · 완료 세트 수<br><code>totalVolumeKg</code> · 총 운동 볼륨</div>
+                        </div>
+                    </div>
+                    <div class="db-card">
+                        <h4><span class="db-tag db-field">필드</span><code>running</code> · Map</h4>
+                        <p class="db-purpose">러닝 운동 상세</p>
+                        <div class="db-branch"><div class="db-node">
+                            <code>targetDistanceMeters</code> · 목표 거리<br>
+                            <code>distanceMeters</code> · 실제 거리<br>
+                            <code>acceptedLocationCount</code> · 채택된 위치 개수<br>
+                            <code>averagePaceSecondsPerKm</code> · 평균 페이스
+                        </div></div>
+                    </div>
+                </div>
+                <h3 style="margin-top:30px">현재까지 확인한 구조</h3>
+                <ul class="db-notes">
+                    <li><strong>개인 원본·친구 공유·랭킹 집계를 분리해 저장합니다.</strong> 운동 완료 시 개인 기록, 공유 기록, 현재 상태, 일별 합계의 네 곳을 함께 갱신합니다.</li>
+                    <li><strong>컬렉션의 계층과 데이터 간 연결은 다릅니다.</strong> 하위 컬렉션은 문서 아래에 두고, 서로 다른 위치의 데이터는 UID·workoutId 등의 값으로 연결합니다.</li>
+                    <li><strong>사진 파일은 Cloud Storage에 저장합니다.</strong> Firestore 운동 문서에는 파일 대신 URL과 생성·만료 시각을 저장합니다.</li>
+                </ul>
+                <p class="db-sources">분석 근거: ShareFit 코드 <code>5415632</code> ·
+                    <a href="https://github.com/SRkang4/ShareFit/blob/54156324094d95a694d4710cb12bd7954a4f34ca/lib/services/workout_service.dart">운동 저장</a> ·
+                    <a href="https://github.com/SRkang4/ShareFit/blob/54156324094d95a694d4710cb12bd7954a4f34ca/lib/models/workout_record.dart">운동 필드</a> ·
+                    <a href="https://github.com/SRkang4/ShareFit/blob/54156324094d95a694d4710cb12bd7954a4f34ca/functions/src/index.ts">알림 데이터</a> ·
+                    <a href="https://github.com/SRkang4/ShareFit/blob/54156324094d95a694d4710cb12bd7954a4f34ca/firestore.rules">보안 규칙</a>
+                </p>
             </section>
             <footer>
                 <a href="index.html">← 메인</a> · <a href="#top">↑ 맨 위로</a>
