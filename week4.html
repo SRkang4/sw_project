@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShareFit - 4주차 진행 내용</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Pretendard",
+        "Noto Sans KR", sans-serif;
+      background: #f5f7fb;
+      color: #1f2937;
+    }
+
+    /* 상단 헤더 */
+    header {
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 24px 40px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 26px;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+
+    .header-title span {
+      color: #5267e8;
+    }
+
+    /* 주차 / 챕터 버튼 */
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 1px solid #d9deea;
+      background: #ffffff;
+      color: #4b5563;
+      padding: 10px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .nav button:hover {
+      background: #f3f5ff;
+      border-color: #5267e8;
+      color: #5267e8;
+    }
+
+    .nav button.active {
+      background: #5267e8;
+      border-color: #5267e8;
+      color: white;
+    }
+
+    /* 본문 */
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 50px 32px 100px;
+    }
+
+    .section {
+      display: none;
+      animation: fadeIn 0.25s ease;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-label {
+      color: #5267e8;
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 38px;
+      margin: 0 0 14px;
+      line-height: 1.25;
+    }
+
+    h2 {
+      font-size: 25px;
+      margin: 0 0 18px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin: 0 0 10px;
+    }
+
+    .description {
+      font-size: 17px;
+      line-height: 1.8;
+      color: #6b7280;
+      margin-bottom: 34px;
+    }
+
+    /* 카드 */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 18px;
+      margin-top: 24px;
+    }
+
+    .card-grid.three {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+      background: white;
+      border: 1px solid #e6e9f0;
+      border-radius: 18px;
+      padding: 24px;
+    }
+
+    .card-number {
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: #eef0ff;
+      color: #5267e8;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .card p {
+      margin: 0;
+      color: #6b7280;
+      line-height: 1.7;
+    }
+
+    /* 강조 박스 */
+    .highlight {
+      background: #eef0ff;
+      border-left: 4px solid #5267e8;
+      padding: 20px 22px;
+      border-radius: 0 14px 14px 0;
+      margin: 26px 0;
+      line-height: 1.8;
+    }
+
+    /* 이미지 자리 */
+    .image-placeholder {
+      width: 100%;
+      min-height: 460px;
+      background: white;
+      border: 2px dashed #b9c1d5;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin: 28px 0;
+      color: #7b8497;
+      text-align: center;
+      padding: 30px;
+    }
+
+    .image-placeholder strong {
+      font-size: 20px;
+      color: #4b5563;
+      margin-bottom: 8px;
+    }
+
+    .image-placeholder span {
+      font-size: 14px;
+    }
+
+    /* 실제 이미지 넣을 때 사용 */
+    .presentation-image {
+      width: 100%;
+      max-height: 650px;
+      object-fit: contain;
+      background: white;
+      border: 1px solid #e6e9f0;
+      border-radius: 18px;
+      padding: 16px;
+      margin: 28px 0;
+    }
+
+    /* 표 */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid #e5e7eb;
+      margin-top: 20px;
+    }
+
+    th,
+    td {
+      padding: 15px 18px;
+      text-align: left;
+      border-bottom: 1px solid #edf0f5;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    th {
+      background: #f7f8fc;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    td {
+      color: #555f70;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* 구조 표현 */
+    .flow {
+      background: #111827;
+      color: #f3f4f6;
+      border-radius: 18px;
+      padding: 26px;
+      margin: 26px 0;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      line-height: 1.9;
+      font-size: 15px;
+      white-space: pre-line;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #eef0ff;
+      color: #5267e8;
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 6px;
+      margin-bottom: 6px;
+    }
+
+    .danger-tag {
+      background: #fff1f1;
+      color: #d14c4c;
+    }
+
+    .success-tag {
+      background: #edf9f1;
+      color: #2e8b57;
+    }
+
+    .feature-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      margin-top: 24px;
+    }
+
+    .feature-box {
+      background: white;
+      border: 1px solid #e6e9f0;
+      border-radius: 18px;
+      padding: 26px;
+    }
+
+    .feature-box ul {
+      padding-left: 20px;
+      line-height: 1.9;
+      color: #5f6878;
+    }
+
+    .big-number {
+      font-size: 54px;
+      font-weight: 900;
+      color: #5267e8;
+      line-height: 1;
+      margin-bottom: 10px;
+    }
+
+    .summary-line {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.7;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 800px) {
+      header {
+        padding: 20px;
+      }
+
+      main {
+        padding: 35px 20px 80px;
+      }
+
+      h1 {
+        font-size: 30px;
+      }
+
+      .card-grid,
+      .card-grid.three,
+      .feature-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .image-placeholder {
+        min-height: 300px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-title">
+    ShareFit <span>S/W 프로젝트</span>
+  </div>
+
+  <div class="nav">
+    <button class="active" onclick="showSection(0, this)">이번 주</button>
+    <button onclick="showSection(1, this)">기존 데이터 분석</button>
+    <button onclick="showSection(2, this)">구조 문제점</button>
+    <button onclick="showSection(3, this)">신규 기능</button>
+    <button onclick="showSection(4, this)">MySQL 설계</button>
+    <button onclick="showSection(5, this)">최종 ERD</button>
+    <button onclick="showSection(6, this)">다음 주</button>
+  </div>
+</header>
+
+
+<main>
+
+  <!-- 1. 이번 주 진행 -->
+  <section class="section active">
+    <h1>이번 주</h1>
+
+    <p class="description">
+      기존 Firebase 데이터 구조를 분석한 뒤,
+      신규 기능에 필요한 데이터까지 함께 고려하여
+      MySQL 기반 데이터 구조와 ERD 설계 완료
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-number">01</div>
+        <h3>Firebase 구조 분석</h3>
+        <p>
+          기존 Firestore의 컬렉션, 문서, 서브컬렉션 구조와
+          각 데이터가 실제 기능에서 어떻게 사용되는지 분석함
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-number">02</div>
+        <h3>중복 데이터 확인</h3>
+        <p>
+          공개용 데이터, 통계 데이터 등 동일한 정보가 여러 위치에
+          반복 저장되는 부분을 확인함
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-number">03</div>
+        <h3>신규 기능 구체화</h3>
+        <p>
+          러닝 코스 표시와 운동 루틴 생성·공유·복사 기능에
+          필요한 데이터를 정리함
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-number">04</div>
+        <h3>MySQL ERD 설계</h3>
+        <p>
+          기존 데이터와 신규 기능 데이터를 종합해
+          관계형 DB 구조로 다시 설계함
+        </p>
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- 2. 기존 데이터 구조 -->
+  <section class="section">
+    <h1>기존 Firebase 데이터 구조 분석</h1>
+
+    <p class="description">
+      기존 ShareFit은 Firebase Auth, Firestore, Storage, FCM을 사용하고 있으며,
+      Firestore는 기능별 조회 편의를 위해 일부 데이터를 중복 저장하고 있었음
+    </p>
+
+    <img src="image/firebase.PNG"
+         alt="기존 firebase 데이터 구조"
+         class="presentation-image">
+  
+    <h2>주요 구조</h2>
+
+    <div class="card-grid three">
+      <div class="card">
+        <h3>사용자 / 친구</h3>
+        <p>
+          users, friendCodes, publicProfiles,
+          friendRequests, friends 등의 구조로 관리
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>운동 기록</h3>
+        <p>
+          workouts 문서 내부에 strength와 running 데이터를
+          Map / Array 형태로 중첩 저장
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>공개 데이터 / 통계</h3>
+        <p>
+          publicActivity, publicWorkoutActivities,
+          publicWorkoutStats 등에 조회용 데이터를 별도로 저장
+        </p>
+      </div>
+    </div>
+
+    <div class="flow">
+users/{uid}
+ └ workouts/{workoutId}
+    ├ strength
+    │  ├ bodyParts[]
+    │  └ exercises[]
+    │      └ sets[]
+    │
+    └ running
+
+publicActivity
+publicWorkoutActivities
+publicWorkoutStats
+    </div>
+  </section>
+
+
+  <!-- 3. 기존 구조 문제점 -->
+  <section class="section">
+    <h1>기존 데이터 구조에서 정리한 부분</h1>
+
+    <p class="description">
+      Firestore에서는 빠른 조회를 위해 같은 데이터를 여러 문서에 저장할 수 있지만,
+      MySQL에서는 관계와 JOIN을 이용할 수 있기 때문에
+      원본 데이터를 중심으로 구조를 단순화함
+    </p>
+
+    <h2>중복 데이터 통합</h2>
+
+    <table>
+      <thead>
+        <tr>
+          <th>기존 Firebase</th>
+          <th>MySQL 변경 방향</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>friendCodes</td>
+          <td>users.friend_code로 통합</td>
+        </tr>
+
+        <tr>
+          <td>publicProfiles</td>
+          <td>users에서 필요한 정보만 조회</td>
+        </tr>
+
+        <tr>
+          <td>publicActivity</td>
+          <td>workouts 및 상세 테이블에서 조회</td>
+        </tr>
+
+        <tr>
+          <td>publicWorkoutActivities</td>
+          <td>원본 운동 기록에서 조회</td>
+        </tr>
+
+        <tr>
+          <td>publicWorkoutStats</td>
+          <td>운동 기록을 기준으로 계산</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 style="margin-top: 38px;">계산 가능한 데이터</h2>
+
+    <div>
+      <span class="tag danger-tag">friendCount 제거</span>
+      <span class="tag danger-tag">completedSetCount 제거</span>
+      <span class="tag danger-tag">totalVolumeKg 제거</span>
+      <span class="tag danger-tag">일별 통계 중복 저장 제거</span>
+      <span class="tag danger-tag">bodyParts 중복 저장 제거</span>
+    </div>
+
+    <div class="highlight">
+      운동 횟수, 운동 시간, 러닝 거리, 헬스 볼륨 등은
+      원본 운동 기록으로 계산할 수 있기 때문에
+      별도 데이터로 중복 저장하지 않는 방향으로 변경함
+    </div>
+  </section>
+
+
+  <!-- 4. 신규 기능 -->
+  <section class="section">
+    <h1>추가 기능 계획</h1>
+
+    <p class="description">
+      기존 ShareFit 기능에 신규 기능도 함께 설계했다.
+    </p>
+
+    <div class="feature-layout">
+
+      <div class="feature-box">
+        <h2>01. 러닝 코스 기록</h2>
+
+        <ul>
+          <li>러닝 중 GPS 위치 좌표 저장</li>
+          <li>운동 종료 후 실제 이동 코스 표시</li>
+          <li>위도·경도와 좌표 순서를 DB에 저장</li>
+          <li>일시정지 구간을 segment로 구분</li>
+        </ul>
+
+        <div class="flow">
+workouts
+↓
+running_details
+↓
+running_route_points
+        </div>
+      </div>
+
+
+      <div class="feature-box">
+        <h2>02. 운동 루틴</h2>
+
+        <ul>
+          <li>사용자당 최대 3개 루틴 구성</li>
+          <li>무분할,2~5분할 Day 구성</li>
+          <li>Day별 종목·세트·목표 중량 설정</li>
+          <li>최근 사용 루틴 우선 추천</li>
+          <li>친구 루틴 조회 및 복사</li>
+        </ul>
+
+        <div class="flow">
+routines
+↓
+routine_days
+↓
+routine_exercises
+↓
+routine_sets
+        </div>
+      </div>
+
+    </div>
+
+
+    <div style="display: flex; gap: 20px;">
+    <img src="image/running.png"
+       alt="러닝 코스 기능 화면"
+       style="width: calc(50% - 10px); object-fit: contain;">
+
+    <img src="image/routine.png"
+       alt="루틴 기능 화면"
+       style="width: calc(50% - 10px); object-fit: contain;">
+    </div>
+
+  </section>
+
+
+  <!-- 5. MySQL 설계 -->
+  <section class="section">
+    <h1>MySQL 구조 설계 방향</h1>
+
+    <p class="description">
+      Firestore의 문서·배열 구조를 그대로 복사하지 않고,
+      데이터의 역할과 관계를 기준으로 테이블을 분리함
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h3>사용자 / 친구 / 알림</h3>
+        <p>
+          users를 중심으로 친구 관계, 요청,
+          알림 설정과 기기 토큰을 관계형 구조로 연결했다.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>헬스 기록</h3>
+        <p>
+          운동 1회 → 종목 → 세트의 1:N 관계를 기준으로
+          strength_exercises와 strength_sets로 분리했다.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>러닝 기록</h3>
+        <p>
+          러닝 전체 정보는 running_details,
+          실제 이동 경로는 running_route_points로 분리했다.
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>루틴</h3>
+        <p>
+          실제 수행 기록과 계획 데이터를 분리하여
+          루틴 수정이 과거 운동 기록에 영향을 주지 않도록 설계했다.
+        </p>
+      </div>
+    </div>
+
+    <h2 style="margin-top: 40px;">헬스 데이터 구조</h2>
+
+    <div class="flow">
+workouts
+↓
+strength_exercises
+↓
+strength_sets
+
+exercises
+↓
+strength_exercises
+    </div>
+
+    <h2>루틴 데이터 구조</h2>
+
+    <div class="flow">
+routines
+↓
+routine_days
+↓
+routine_exercises
+↓
+routine_sets
+
+exercises
+↓
+routine_exercises
+    </div>
+
+    <div class="highlight">
+      실제 운동 기록과 루틴의 구조는 비슷하지만,
+      <strong>실제 수행 결과와 앞으로 수행할 계획을 서로 분리</strong>하여 관리한다.
+    </div>
+  </section>
+
+
+  <!-- 6. 최종 ERD -->
+  <section class="section">
+    <h1>최종 MySQL ERD</h1>
+
+    <p class="description">
+      기존 Firebase 데이터, 중복 제거 결과,
+      신규 러닝·루틴 기능에 필요한 데이터를 종합하여
+      현재 19개 테이블 기준으로 ERD를 구성함
+    </p>
+
+      <img src="image/ERD.png"
+         alt="ShareFit MySQL ERD"
+         class="presentation-image">
+
+
+    <div class="card-grid three">
+      <div class="card">
+        <div class="big-number">19</div>
+        <h3>테이블</h3>
+        <p>
+          현재 기능과 신규 기능을 포함한 최종 데이터 구조
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="big-number">2</div>
+        <h3>신규 기능</h3>
+        <p>
+          러닝 코스 기록과 루틴 생성·복사 기능
+        </p>
+      </div>
+
+      <div class="card">
+        <h3>중복 제거</h3>
+        <p>
+          중복 복사본 대신 원본 데이터를 기준으로 조회
+        </p>
+      </div>
+    </div>
+
+    <p class="summary-line">
+      Firebase에 맞춰져 있던 구조를
+      Spring Boot + MySQL 환경에서 사용할 수 있는
+      관계형 데이터 구조로 재설계했다.
+    </p>
+  </section>
+
+
+  <section class="section">
+    <h1>다음 진행 계획</h1>
+
+    <p class="description">
+      실제 Spring Boot 서버 구현을 위한 설계 단계로 넘어갈 예정
+    </p>
+
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="card-number">01</div>
+        <h3>API 기능 정의</h3>
+        <p>
+          사용자, 친구, 운동, 루틴, 러닝 기능별로
+          필요한 REST API를 정리
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-number">02</div>
+        <h3>Spring Boot 구조 설계</h3>
+        <p>
+          Controller, Service, Repository, Entity 구조와
+          데이터 흐름을 설계
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="card-number">03</div>
+        <h3>MySQL 와 Spring Boot 구현 시작</h3>
+        <p>
+           MySQL 테이블을 생성하고 Spring Boot 프로젝트와 연동해 실제 서버 구현을 시작함
+        </p>
+      </div>
+
+    </div>
+
+   </section>
+   <footer style="margin-top: 40px;">
+  <a href="index.html"
+     style="
+       display: inline-block;
+       padding: 10px 18px;
+       border: 1px solid #d0d7de;
+       border-radius: 10px;
+       text-decoration: none;
+       color: #333;
+       background: #fff;
+       font-size: 14px;
+       font-weight: 600;
+       transition: 0.2s;
+     ">
+    ← 메인으로
+  </a>
+</footer>
+
+</main>
+
+
+<script>
+  function showSection(index, button) {
+    const sections = document.querySelectorAll(".section");
+    const buttons = document.querySelectorAll(".nav button");
+
+    sections.forEach((section) => {
+      section.classList.remove("active");
+    });
+
+    buttons.forEach((btn) => {
+      btn.classList.remove("active");
+    });
+
+    sections[index].classList.add("active");
+    button.classList.add("active");
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+</script>
+
+</body>
+</html>
