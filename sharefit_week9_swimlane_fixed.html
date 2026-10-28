@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShareFit 9주차 발표 - 수정본</title>
+  <style>
+    :root{
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --text:#182033;
+      --muted:#6b7280;
+      --blue:#5267e8;
+      --blue2:#eef1ff;
+      --line:#dfe4ee;
+      --dark:#111827;
+      --red:#c2414b;
+      --amber:#b86b12;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR","Segoe UI",sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      overflow:hidden;
+    }
+    .deck{height:100vh;position:relative}
+    .slide{
+      display:none;
+      height:100vh;
+      padding:34px 54px 82px;
+      overflow:auto;
+    }
+    .slide.active{display:block}
+    .header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:18px;
+    }
+    .kicker{
+      color:var(--blue);
+      font-size:14px;
+      font-weight:800;
+      letter-spacing:.04em;
+    }
+    .week{font-size:14px;color:var(--muted)}
+    h1{font-size:38px;line-height:1.18;margin:0 0 16px}
+    h2{font-size:31px;line-height:1.22;margin:0 0 18px}
+    h3{font-size:19px;margin:0 0 10px}
+    p{font-size:17px;line-height:1.55;margin:7px 0}
+    ul{margin:8px 0 0 20px;padding:0}
+    li{font-size:16px;line-height:1.5;margin:6px 0}
+    code{font-family:"SFMono-Regular",Consolas,monospace}
+    pre{
+      margin:10px 0 0;
+      padding:16px 18px;
+      background:#101827;
+      color:#e5ecff;
+      border-radius:14px;
+      overflow:auto;
+      font-size:13px;
+      line-height:1.5;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .comment{color:#93c5fd}
+    .accent{color:#c4b5fd;font-weight:700}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:18px;
+    }
+    .intro{
+      max-width:980px;
+      margin:30px auto 0;
+    }
+    .intro .summary{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:24px;
+    }
+    .intro .summary .card{min-height:130px}
+    .tag{
+      display:inline-block;
+      padding:6px 10px;
+      background:var(--blue2);
+      color:var(--blue);
+      border-radius:999px;
+      font-size:13px;
+      font-weight:800;
+      margin-bottom:12px;
+    }
+    .status{
+      font-weight:800;
+      color:var(--blue);
+    }
+    .callout{
+      border-left:4px solid var(--blue);
+      background:var(--blue2);
+      padding:14px 16px;
+      border-radius:10px;
+      font-size:16px;
+      line-height:1.5;
+    }
+    .endpoint{
+      display:inline-block;
+      padding:14px 18px;
+      background:var(--dark);
+      color:#fff;
+      border-radius:13px;
+      font-family:"SFMono-Regular",Consolas,monospace;
+      font-size:21px;
+      font-weight:800;
+    }
+
+    /* Swimlane */
+    .swim-wrap{
+      background:white;
+      border:1px solid var(--line);
+      border-radius:18px;
+      overflow:hidden;
+    }
+    .swim-row{
+      display:grid;
+      grid-template-columns:150px 1fr;
+      min-height:78px;
+      border-bottom:1px solid var(--line);
+    }
+    .swim-row:last-child{border-bottom:none}
+    .lane{
+      background:#eef1f8;
+      padding:16px 14px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      border-right:1px solid var(--line);
+    }
+    .lane-body{
+      position:relative;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 22px 14px 42px;
+      flex-wrap:wrap;
+    }
+    .lane-body::before{
+      content:"↓";
+      position:absolute;
+      left:14px;
+      top:-15px;
+      color:var(--blue);
+      font-size:28px;
+      font-weight:900;
+    }
+    .swim-row:first-child .lane-body::before{display:none}
+    .node{
+      background:var(--blue2);
+      color:var(--blue);
+      border-radius:999px;
+      padding:7px 11px;
+      font-weight:800;
+      font-size:13px;
+      white-space:nowrap;
+    }
+    .desc{font-size:15px;line-height:1.45}
+    .db-node{
+      background:#f4f4f5;
+      color:#3f3f46;
+    }
+    .result-node{
+      background:#eef6ff;
+      color:#2855c5;
+    }
+
+    .code-layout{
+      display:grid;
+      grid-template-columns:1.25fr .75fr;
+      gap:18px;
+      align-items:start;
+    }
+    .rolebox{
+      background:white;
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:16px;
+    }
+    .rolebox p,.rolebox li{font-size:15px}
+    .file-label{
+      font-family:"SFMono-Regular",Consolas,monospace;
+      font-size:14px;
+      font-weight:800;
+      color:var(--blue);
+      margin-bottom:8px;
+    }
+    .mini-flow{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      flex-wrap:wrap;
+      margin-top:10px;
+    }
+    .mini-flow span{
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:10px;
+      padding:7px 9px;
+      font-size:13px;
+      font-weight:700;
+    }
+    .arrow{color:var(--blue);font-weight:900}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius:12px;
+      overflow:hidden;
+    }
+    th,td{
+      padding:10px 12px;
+      border-bottom:1px solid var(--line);
+      text-align:center;
+      font-size:14px;
+    }
+    th{background:#eef1f8;font-weight:800}
+    tr:last-child td{border-bottom:none}
+    .selected{background:#eef1ff;font-weight:800}
+    .images3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .images4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    .figure{
+      background:white;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:8px;
+      text-align:center;
+    }
+    .figure img{
+      width:100%;
+      height:185px;
+      object-fit:contain;
+      border-radius:8px;
+    }
+    .figure .cap{font-size:12px;color:var(--muted);margin-top:5px}
+    .small{font-size:14px;color:var(--muted)}
+    .metric{font-size:29px;font-weight:900;color:var(--blue);margin:6px 0}
+    .danger{color:var(--red);font-weight:800}
+    .warn{color:var(--amber);font-weight:800}
+    .nav{
+      position:fixed;
+      left:0;right:0;bottom:0;
+      height:60px;
+      background:rgba(246,248,252,.96);
+      border-top:1px solid var(--line);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      backdrop-filter:blur(8px);
+    }
+    .nav button{
+      border:1px solid var(--line);
+      background:white;
+      border-radius:10px;
+      padding:9px 15px;
+      font-weight:800;
+      cursor:pointer;
+    }
+    .counter{min-width:80px;text-align:center;font-size:13px;color:var(--muted)}
+    .progress{
+      position:fixed;left:0;bottom:60px;height:3px;
+      background:var(--blue);transition:width .2s;
+    }
+    @media(max-width:950px){
+      .slide{padding:24px 20px 78px}
+      .grid2,.grid3,.code-layout,.intro .summary,.images3,.images4{grid-template-columns:1fr}
+      .swim-row{grid-template-columns:110px 1fr}
+      .figure img{height:210px}
+    }
+  </style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 1 -->
+  <section class="slide active">
+    <div class="header">
+      <div class="kicker">S/W 프로젝트 · 9주차</div>
+      <div class="week">ShareFit Backend Migration</div>
+    </div>
+    <div class="intro">
+      <div class="tag">이번 주 핵심</div>
+      <h1>MySQL 연결 · 운동 완료 API · RDP 경로 단순화</h1>
+      <p>이번 발표는 구현한 내용을 바로 설명하는 방식으로 진행합니다.</p>
+
+      <div class="summary">
+        <div class="card">
+          <h3>MySQL 데이터베이스</h3>
+          <p class="status">ERD 기준 테이블 생성 완료</p>
+          <p class="small">users, workouts, running_details, running_route_points 등</p>
+        </div>
+        <div class="card">
+          <h3>Spring Boot 연동</h3>
+          <p class="status">sharefit DB 연결 확인</p>
+          <p class="small">HikariCP + JPA 기반으로 연결</p>
+        </div>
+        <div class="card">
+          <h3>운동 완료 API</h3>
+          <p class="status">PATCH API 구현 및 테스트</p>
+          <p class="small">러닝 완료 시 거리 반영 + RDP 단순화</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">01 · 이번 주 진행 현황</div>
+      <div class="week">9주차</div>
+    </div>
+    <h2>이번 주에 완료한 작업</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>① MySQL 데이터베이스 구축</h3>
+        <p class="status">ERD 기준 테이블 생성 완료</p>
+        <p class="small">ShareFit 백엔드용 스키마 구성</p>
+      </div>
+      <div class="card">
+        <h3>② Spring Boot ↔ MySQL 연결</h3>
+        <p class="status">실제 연결 확인 완료</p>
+        <p class="small">Spring Boot 실행 시 <code>sharefit</code> DB 연결 확인</p>
+      </div>
+      <div class="card">
+        <h3>③ 운동 완료 API 구현</h3>
+        <p class="status">PATCH API 구현 및 테스트</p>
+        <p class="small">상태 변경, 거리 반영, RDP 단순화 처리</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:20px">
+      발표에서는 <b>운동 완료 요청이 Controller부터 DB까지 어떻게 이동하는지</b>와
+      <b>러닝 경로 RDP 실험 결과</b>를 중심으로 설명합니다.
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">02 · 운동 완료 API</div>
+      <div class="week">PATCH API</div>
+    </div>
+    <h2>운동 완료 요청</h2>
+    <div class="endpoint">PATCH /workouts/{workoutId}/complete</div>
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h3>헬스 운동</h3>
+        <ul>
+          <li>운동 상태를 완료로 변경</li>
+          <li>종료 시간 저장</li>
+          <li>실제 운동 시간 계산</li>
+          <li>거리 데이터는 필요 없음</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>러닝 운동</h3>
+        <ul>
+          <li>완료 시 최종 거리 <code>distanceM</code> 전달</li>
+          <li><code>running_details</code>에 거리 반영</li>
+          <li>저장된 GPS 경로 조회</li>
+          <li>RDP 2.5m 적용 후 경로 단순화</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">03 · 처리 흐름</div>
+      <div class="week">Swimlane Process Diagram</div>
+    </div>
+    <h2>운동 완료 API 내부 처리 과정</h2>
+    <p class="small" style="margin-bottom:12px">
+      단순 호출 순서가 아니라, 각 계층에서 실제로 어떤 판단을 하고 실패 시 어디서 반환되는지 표현했습니다.
+    </p>
+
+    <div style="background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;overflow:auto">
+      <svg viewBox="0 0 1560 1510" style="width:100%;min-width:1180px;height:auto;display:block" aria-label="운동 완료 API 스위밍 풀 다이어그램">
+        <defs>
+          <marker id="arrowHead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#5267e8"/>
+          </marker>
+          <marker id="errorHead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+            <path d="M0,0 L0,6 L9,3 z" fill="#c2414b"/>
+          </marker>
+          <style>
+            .lane-bg{fill:#fbfcff;stroke:#dfe4ee;stroke-width:1.2}
+            .lane-head{fill:#eef1f8;stroke:#dfe4ee;stroke-width:1.2}
+            .lane-title{font:700 17px Pretendard,Arial,sans-serif;fill:#182033;text-anchor:middle}
+            .box{fill:#fff;stroke:#5267e8;stroke-width:1.8;rx:10}
+            .dbbox{fill:#f4f4f5;stroke:#71717a;stroke-width:1.6;rx:10}
+            .errbox{fill:#fff7f7;stroke:#c2414b;stroke-width:1.6;rx:10}
+            .diamond{fill:#fff;stroke:#5267e8;stroke-width:1.8}
+            .txt{font:600 14px Pretendard,Arial,sans-serif;fill:#182033;text-anchor:middle}
+            .smalltxt{font:500 12px Pretendard,Arial,sans-serif;fill:#6b7280;text-anchor:middle}
+            .yn{font:700 12px Pretendard,Arial,sans-serif;fill:#5267e8}
+            .errtxt{font:700 13px Pretendard,Arial,sans-serif;fill:#c2414b;text-anchor:middle}
+            .line{fill:none;stroke:#5267e8;stroke-width:2;marker-end:url(#arrowHead)}
+            .errline{fill:none;stroke:#c2414b;stroke-width:1.9;stroke-dasharray:6 4;marker-end:url(#errorHead)}
+            .thin{fill:none;stroke:#9ca3af;stroke-width:1.2}
+          </style>
+        </defs>
+
+        <!-- Lane backgrounds -->
+        <rect class="lane-bg" x="20" y="20" width="240" height="1460"/>
+        <rect class="lane-bg" x="260" y="20" width="240" height="1460"/>
+        <rect class="lane-bg" x="500" y="20" width="300" height="1460"/>
+        <rect class="lane-bg" x="800" y="20" width="240" height="1460"/>
+        <rect class="lane-bg" x="1040" y="20" width="240" height="1460"/>
+        <rect class="lane-bg" x="1280" y="20" width="260" height="1460"/>
+
+        <!-- Lane headers -->
+        <rect class="lane-head" x="20" y="20" width="240" height="52"/>
+        <rect class="lane-head" x="260" y="20" width="240" height="52"/>
+        <rect class="lane-head" x="500" y="20" width="300" height="52"/>
+        <rect class="lane-head" x="800" y="20" width="240" height="52"/>
+        <rect class="lane-head" x="1040" y="20" width="240" height="52"/>
+        <rect class="lane-head" x="1280" y="20" width="260" height="52"/>
+
+        <text class="lane-title" x="140" y="53">Flutter</text>
+        <text class="lane-title" x="380" y="53">Controller</text>
+        <text class="lane-title" x="650" y="53">Service</text>
+        <text class="lane-title" x="920" y="53">Repository</text>
+        <text class="lane-title" x="1160" y="53">Entity / JPA</text>
+        <text class="lane-title" x="1410" y="53">MySQL DB</text>
+
+        <!-- Request -->
+        <rect class="box" x="55" y="105" width="170" height="72"/>
+        <text class="txt" x="140" y="133">운동 완료 요청</text>
+        <text class="smalltxt" x="140" y="155">workoutId + distanceM?</text>
+
+        <rect class="box" x="295" y="105" width="170" height="72"/>
+        <text class="txt" x="380" y="133">PATCH 요청 수신</text>
+        <text class="smalltxt" x="380" y="155">Controller</text>
+
+        <path class="line" d="M225 141 H295"/>
+
+        <rect class="box" x="555" y="105" width="190" height="72"/>
+        <text class="txt" x="650" y="133">completeWorkout()</text>
+        <text class="smalltxt" x="650" y="155">Service 호출</text>
+        <path class="line" d="M465 141 H555"/>
+
+        <!-- Repository lookup -->
+        <rect class="box" x="835" y="205" width="170" height="72"/>
+        <text class="txt" x="920" y="233">findByIdForUpdate()</text>
+        <text class="smalltxt" x="920" y="255">PESSIMISTIC_WRITE</text>
+        <path class="line" d="M650 177 V241 H835"/>
+
+        <rect class="dbbox" x="1325" y="205" width="170" height="72"/>
+        <text class="txt" x="1410" y="233">SELECT ... FOR UPDATE</text>
+        <text class="smalltxt" x="1410" y="255">workouts 조회 + Lock</text>
+        <path class="line" d="M1005 241 H1325"/>
+
+        <path class="line" d="M1410 277 V322 H650 V350"/>
+
+        <!-- Exists? -->
+        <polygon class="diamond" points="650,350 740,410 650,470 560,410"/>
+        <text class="txt" x="650" y="405">운동 존재?</text>
+        <text class="smalltxt" x="650" y="426">Optional 확인</text>
+
+        <!-- 404 -->
+        <rect class="errbox" x="300" y="365" width="160" height="66"/>
+        <text class="errtxt" x="380" y="393">404 NOT FOUND</text>
+        <text class="smalltxt" x="380" y="415">운동 기록 없음</text>
+        <path class="errline" d="M560 410 H460"/>
+        <text class="yn" x="505" y="399">아니오</text>
+        <path class="errline" d="M380 365 V320 H140 V177"/>
+        <text class="smalltxt" x="210" y="310">에러 응답 반환</text>
+
+        <!-- owner? -->
+        <path class="line" d="M650 470 V525"/>
+        <text class="yn" x="665" y="505">예</text>
+        <polygon class="diamond" points="650,525 740,585 650,645 560,585"/>
+        <text class="txt" x="650" y="580">현재 사용자 소유?</text>
+        <text class="smalltxt" x="650" y="601">checkOwner()</text>
+
+        <!-- 403 -->
+        <rect class="errbox" x="300" y="542" width="160" height="66"/>
+        <text class="errtxt" x="380" y="570">403 FORBIDDEN</text>
+        <text class="smalltxt" x="380" y="592">다른 사용자의 운동</text>
+        <path class="errline" d="M560 585 H460"/>
+        <text class="yn" x="505" y="574">아니오</text>
+        <path class="errline" d="M380 542 V505 H140 V177"/>
+
+        <!-- Completable? -->
+        <path class="line" d="M650 645 V700"/>
+        <text class="yn" x="665" y="680">예</text>
+        <polygon class="diamond" points="650,700 740,760 650,820 560,760"/>
+        <text class="txt" x="650" y="754">완료 가능한 상태?</text>
+        <text class="smalltxt" x="650" y="777">validateCompletable()</text>
+
+        <!-- 400 status -->
+        <rect class="errbox" x="300" y="717" width="160" height="66"/>
+        <text class="errtxt" x="380" y="745">400 BAD REQUEST</text>
+        <text class="smalltxt" x="380" y="767">이미 완료 / 잘못된 상태</text>
+        <path class="errline" d="M560 760 H460"/>
+        <text class="yn" x="505" y="749">아니오</text>
+        <path class="errline" d="M380 717 V680 H140 V177"/>
+
+        <!-- Running? -->
+        <path class="line" d="M650 820 V875"/>
+        <text class="yn" x="665" y="855">예</text>
+        <polygon class="diamond" points="650,875 740,935 650,995 560,935"/>
+        <text class="txt" x="650" y="930">러닝인가?</text>
+        <text class="smalltxt" x="650" y="952">workout.isRunning()</text>
+
+        <!-- NO running -> entity complete -->
+        <path class="line" d="M740 935 H1160 V1055"/>
+        <text class="yn" x="835" y="923">아니오 → 헬스</text>
+
+        <!-- YES running -> distance valid -->
+        <path class="line" d="M650 995 V1045"/>
+        <text class="yn" x="665" y="1027">예 → 러닝</text>
+
+        <polygon class="diamond" points="650,1045 740,1105 650,1165 560,1105"/>
+        <text class="txt" x="650" y="1099">distanceM 유효?</text>
+        <text class="smalltxt" x="650" y="1121">null / 음수 등 검증</text>
+
+        <!-- invalid distance -->
+        <rect class="errbox" x="300" y="1072" width="160" height="66"/>
+        <text class="errtxt" x="380" y="1100">400 BAD REQUEST</text>
+        <text class="smalltxt" x="380" y="1122">러닝 거리값 오류</text>
+        <path class="errline" d="M560 1105 H460"/>
+        <text class="yn" x="505" y="1094">아니오</text>
+        <path class="errline" d="M380 1072 V1015 H140 V177"/>
+
+        <!-- running details -->
+        <rect class="box" x="835" y="1190" width="170" height="70"/>
+        <text class="txt" x="920" y="1217">running_details 조회</text>
+        <text class="smalltxt" x="920" y="1240">findById(workoutId)</text>
+        <path class="line" d="M650 1165 V1225 H835"/>
+        <text class="yn" x="665" y="1192">예</text>
+
+        <rect class="dbbox" x="1325" y="1190" width="170" height="70"/>
+        <text class="txt" x="1410" y="1217">러닝 상세 조회</text>
+        <text class="smalltxt" x="1410" y="1240">running_details</text>
+        <path class="line" d="M1005 1225 H1325"/>
+
+        <!-- details exists -->
+        <path class="line" d="M1410 1260 V1300 H920 V1320"/>
+        <polygon class="diamond" points="920,1320 995,1370 920,1420 845,1370"/>
+        <text class="txt" x="920" y="1365">상세 존재?</text>
+        <text class="smalltxt" x="920" y="1385">Optional 확인</text>
+
+        <!-- detail 404 -->
+        <rect class="errbox" x="600" y="1337" width="160" height="66"/>
+        <text class="errtxt" x="680" y="1365">404 NOT FOUND</text>
+        <text class="smalltxt" x="680" y="1387">러닝 상세 없음</text>
+        <path class="errline" d="M845 1370 H760"/>
+        <text class="yn" x="792" y="1359">아니오</text>
+        <path class="errline" d="M680 1337 V1295 H380 V717"/>
+
+        <!-- Detail yes -> update/RDP -->
+        <path class="line" d="M995 1370 H1100"/>
+        <text class="yn" x="1020" y="1359">예</text>
+
+        <rect class="box" x="1085" y="1330" width="150" height="80"/>
+        <text class="txt" x="1160" y="1358">거리 갱신</text>
+        <text class="smalltxt" x="1160" y="1380">updateDistance()</text>
+        <text class="smalltxt" x="1160" y="1397">RDP 2.5m 처리</text>
+
+        <!-- RDP failure rollback note -->
+        <rect class="errbox" x="1295" y="1330" width="210" height="80"/>
+        <text class="errtxt" x="1400" y="1355">RDP / DB 처리 실패 시</text>
+        <text class="smalltxt" x="1400" y="1378">@Transactional ROLLBACK</text>
+        <text class="smalltxt" x="1400" y="1397">전체 변경 취소</text>
+        <path class="errline" d="M1235 1370 H1295"/>
+
+        <!-- Common entity complete box -->
+        <rect class="box" x="1080" y="1030" width="160" height="78"/>
+        <text class="txt" x="1160" y="1058">workout.complete()</text>
+        <text class="smalltxt" x="1160" y="1080">status / endedAt</text>
+        <text class="smalltxt" x="1160" y="1097">durationSeconds 변경</text>
+
+        <!-- running successful path back up to entity complete -->
+        <path class="line" d="M1160 1330 V1108"/>
+
+        <!-- DB dirty check -->
+        <rect class="dbbox" x="1320" y="1030" width="180" height="78"/>
+        <text class="txt" x="1410" y="1058">Dirty Checking</text>
+        <text class="smalltxt" x="1410" y="1080">UPDATE SQL 실행</text>
+        <text class="smalltxt" x="1410" y="1097">COMMIT</text>
+        <path class="line" d="M1240 1069 H1320"/>
+
+        <!-- Response -->
+        <rect class="box" x="555" y="1440" width="190" height="52"/>
+        <text class="txt" x="650" y="1470">Response DTO 생성</text>
+
+        <rect class="box" x="295" y="1440" width="170" height="52"/>
+        <text class="txt" x="380" y="1470">200 OK 반환</text>
+
+        <rect class="box" x="55" y="1440" width="170" height="52"/>
+        <text class="txt" x="140" y="1470">Flutter 완료 처리</text>
+
+        <!-- Commit to response path -->
+        <path class="line" d="M1410 1108 V1458 H745"/>
+        <path class="line" d="M555 1466 H465"/>
+        <path class="line" d="M295 1466 H225"/>
+
+        <!-- Transaction bracket -->
+        <path class="thin" d="M520 185 H1520"/>
+        <text class="smalltxt" x="1020" y="178">@Transactional 영역: Service 진입 이후 성공 시 COMMIT / 예외 시 전체 ROLLBACK</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- 5 Controller -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">04 · Controller</div>
+      <div class="week">WorkoutController.java</div>
+    </div>
+    <h2>① API 요청을 받는 부분</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">WorkoutController.java</div>
+        <pre><span class="comment">// 운동 완료 API</span>
+@PatchMapping("/{workoutId}/complete")
+public WorkoutCompleteResponse completeWorkout(
+        <span class="comment">// URL의 workoutId를 받음</span>
+        @PathVariable Long workoutId,
+
+        <span class="comment">// 러닝이면 Body에 distanceM이 들어오고,
+        // 헬스면 Body가 없어도 되므로 required = false</span>
+        @RequestBody(required = false)
+        WorkoutCompleteRequest request
+) {
+    <span class="comment">// Controller에서는 직접 DB 처리를 하지 않고
+    // Service에 필요한 값만 넘김</span>
+    return workoutService.completeWorkout(
+            workoutId,
+            currentUserId(),
+            request
+    );
+}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>Controller 역할</h3>
+        <ul>
+          <li>URL과 HTTP Method 연결</li>
+          <li>PathVariable 수신</li>
+          <li>Request Body 수신</li>
+          <li>현재 사용자 ID 전달</li>
+          <li>실제 비즈니스 로직은 Service에 위임</li>
+        </ul>
+        <div class="mini-flow">
+          <span>Flutter</span><b class="arrow">→</b><span>Controller</span><b class="arrow">→</b><span>Service</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 Request DTO -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">05 · Request DTO</div>
+      <div class="week">WorkoutCompleteRequest.java</div>
+    </div>
+    <h2>② 앱에서 보낸 JSON을 Java 객체로 받는 부분</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">WorkoutCompleteRequest.java</div>
+        <pre><span class="comment">// 운동 완료 요청 Body의 형태를 정의</span>
+public record WorkoutCompleteRequest(
+
+        <span class="comment">// 러닝 완료 시 최종 거리(m)
+        // 예: { "distanceM": 5230.4 }</span>
+        BigDecimal distanceM
+
+) {}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>왜 DTO를 따로 쓰는가?</h3>
+        <ul>
+          <li>Flutter가 보내는 입력 형식을 명확히 정의</li>
+          <li>Entity를 API 입력으로 직접 노출하지 않음</li>
+          <li>헬스와 러닝 요청 차이를 Service에서 판단</li>
+        </ul>
+        <p class="small">러닝인데 <code>distanceM</code>이 없으면 Service에서 잘못된 요청으로 처리합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7 Service -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">06 · Service</div>
+      <div class="week">WorkoutService.java</div>
+    </div>
+    <h2>③ 운동 완료의 핵심 로직</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">WorkoutService.java</div>
+        <pre>@Transactional
+public WorkoutCompleteResponse completeWorkout(
+        Long workoutId,
+        Long currentUserId,
+        WorkoutCompleteRequest request
+) {
+    <span class="comment">// 1. 운동을 조회하면서 해당 행을 잠금</span>
+    Workout workout = workoutRepository
+            .findByIdForUpdate(workoutId)
+            .orElseThrow(() ->
+                    new NotFoundException("운동 기록이 없습니다."));
+
+    <span class="comment">// 2. 현재 사용자의 운동인지 확인</span>
+    checkOwner(workout, currentUserId);
+
+    <span class="comment">// 3. 이미 완료된 운동인지 등 상태 확인</span>
+    validateCompletable(workout);
+
+    RunningDetails details = null;
+
+    if (workout.isRunning()) {
+        <span class="comment">// 4. 러닝이면 distanceM 필수</span>
+        BigDecimal distance = validateDistance(request);
+
+        <span class="comment">// 5. 러닝 상세 정보 조회</span>
+        details = runningDetailsRepository
+                .findById(workoutId)
+                .orElseThrow(() ->
+                        new NotFoundException("러닝 상세가 없습니다."));
+
+        <span class="comment">// 6. 최종 거리 저장</span>
+        details.updateDistance(distance);
+    }
+
+    <span class="comment">// 7. status / endedAt / durationSeconds 변경</span>
+    workout.complete(LocalDateTime.now(workoutClock));
+
+    if (details != null) {
+        <span class="comment">// 8. 저장된 GPS 경로를 RDP 2.5m로 단순화</span>
+        simplifyRoute(workoutId);
+    }
+
+    <span class="comment">// 9. 완료된 운동 정보를 Response DTO로 변환</span>
+    return WorkoutCompleteResponse.from(workout);
+}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>Service가 담당하는 것</h3>
+        <ul>
+          <li>존재 여부 확인</li>
+          <li>사용자 권한 확인</li>
+          <li>완료 가능한 상태인지 확인</li>
+          <li>러닝 거리 검증</li>
+          <li>운동 완료 처리</li>
+          <li>RDP 경로 단순화</li>
+        </ul>
+        <div class="callout" style="margin-top:12px">
+          <b>@Transactional</b>로 묶여 있으므로 중간에 예외가 발생하면 전체 작업을 ROLLBACK합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 Repository -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">07 · Repository</div>
+      <div class="week">WorkoutRepository.java</div>
+    </div>
+    <h2>④ DB에서 운동 데이터를 조회하는 부분</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">WorkoutRepository.java</div>
+        <pre>public interface WorkoutRepository
+        extends JpaRepository&lt;Workout, Long&gt; {
+
+    <span class="comment">// 같은 운동을 동시에 완료하려는 상황 방지</span>
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+
+    <span class="comment">// workoutId에 해당하는 운동을 조회</span>
+    @Query("""
+        select w
+        from Workout w
+        where w.workoutId = :workoutId
+    """)
+    Optional&lt;Workout&gt; findByIdForUpdate(
+            @Param("workoutId") Long workoutId
+    );
+}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>PESSIMISTIC_WRITE</h3>
+        <p>조회한 운동 행에 DB Lock을 걸어 다른 트랜잭션이 동시에 수정하지 못하도록 합니다.</p>
+        <ul>
+          <li>중복 완료 방지</li>
+          <li>동시에 상태가 변경되는 문제 방지</li>
+          <li>한 트랜잭션이 끝난 뒤 다음 수정 허용</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 Entity -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">08 · Entity</div>
+      <div class="week">Workout.java</div>
+    </div>
+    <h2>⑤ 실제 운동 상태를 바꾸는 부분</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">Workout.java</div>
+        <pre>@Entity
+@Table(name = "workouts")
+public class Workout {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long workoutId;
+
+    <span class="comment">// IN_PROGRESS → COMPLETED 로 변경</span>
+    @Enumerated(EnumType.STRING)
+    private WorkoutStatus status;
+
+    private LocalDateTime startedAt;
+    private LocalDateTime endedAt;
+    private Long durationSeconds;
+
+    public void complete(LocalDateTime now) {
+        <span class="comment">// 1. 종료 시간 저장</span>
+        this.endedAt = now;
+
+        <span class="comment">// 2. 실제 운동 시간 계산
+        // 필요 시 일시정지 시간은 별도 계산 로직에서 제외</span>
+        this.durationSeconds =
+                Duration.between(this.startedAt, now)
+                        .getSeconds();
+
+        <span class="comment">// 3. 최종 상태를 완료로 변경</span>
+        this.status = WorkoutStatus.COMPLETED;
+    }
+
+    public boolean isRunning() {
+        return this.type == WorkoutType.RUNNING;
+    }
+}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>Entity에서 바뀌는 값</h3>
+        <ul>
+          <li><code>status</code> → COMPLETED</li>
+          <li><code>endedAt</code> → 현재 종료 시간</li>
+          <li><code>durationSeconds</code> → 실제 운동 시간</li>
+        </ul>
+        <div class="callout" style="margin-top:12px">
+          Entity는 트랜잭션 안에서 조회된 상태이므로 값만 바꿔도 JPA가 변경을 감지합니다.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 JPA -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">09 · JPA / Transaction</div>
+      <div class="week">DB 반영</div>
+    </div>
+    <h2>⑥ 별도 UPDATE SQL 없이 DB에 반영</h2>
+    <div class="grid3">
+      <div class="card">
+        <h3>Entity 변경</h3>
+        <p><code>workout.complete(...)</code></p>
+        <p class="small">Java 객체의 필드 값이 변경됩니다.</p>
+      </div>
+      <div class="card">
+        <h3>Dirty Checking</h3>
+        <p><b>변경 감지</b></p>
+        <p class="small">JPA가 조회 시점과 현재 Entity 상태를 비교합니다.</p>
+      </div>
+      <div class="card">
+        <h3>COMMIT / ROLLBACK</h3>
+        <p class="status">성공 → COMMIT</p>
+        <p class="danger">예외 → ROLLBACK</p>
+      </div>
+    </div>
+
+    <div class="mini-flow" style="margin-top:24px">
+      <span>Entity 조회</span><b class="arrow">→</b>
+      <span>값 변경</span><b class="arrow">→</b>
+      <span>Dirty Checking</span><b class="arrow">→</b>
+      <span>UPDATE SQL</span><b class="arrow">→</b>
+      <span>MySQL 저장</span>
+    </div>
+
+    <div class="callout" style="margin-top:20px">
+      운동 완료, 러닝 거리 저장, RDP 경로 저장을 한 트랜잭션으로 처리하기 때문에
+      중간 단계에서 실패하면 일부 데이터만 저장되는 상황을 방지할 수 있습니다.
+    </div>
+  </section>
+
+  <!-- 11 Response -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">10 · Response DTO</div>
+      <div class="week">WorkoutCompleteResponse.java</div>
+    </div>
+    <h2>⑦ 완료 결과를 Flutter로 반환</h2>
+    <div class="code-layout">
+      <div>
+        <div class="file-label">WorkoutCompleteResponse.java</div>
+        <pre>public record WorkoutCompleteResponse(
+        Long workoutId,
+        String status,
+        LocalDateTime endedAt,
+        Long durationSeconds
+) {
+
+    public static WorkoutCompleteResponse from(
+            Workout workout
+    ) {
+        <span class="comment">// Entity 전체를 보내지 않고
+        // 앱에 필요한 값만 응답으로 반환</span>
+        return new WorkoutCompleteResponse(
+                workout.getWorkoutId(),
+                workout.getStatus().name(),
+                workout.getEndedAt(),
+                workout.getDurationSeconds()
+        );
+    }
+}</pre>
+      </div>
+      <div class="rolebox">
+        <h3>최종 응답 예시</h3>
+        <pre>{
+  "workoutId": 15,
+  "status": "COMPLETED",
+  "endedAt": "2026-10-28T00:35:21",
+  "durationSeconds": 3642
+}</pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- 12 RDP intro -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">11 · RDP 적용 이유</div>
+      <div class="week">러닝 GPS 경로</div>
+    </div>
+    <h2>GPS 좌표를 왜 줄였는가?</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>문제</h3>
+        <p>러닝 중 GPS 좌표가 계속 쌓이면 저장량과 조회 데이터가 커집니다.</p>
+        <p class="metric">3,924개</p>
+        <p class="small">첫 번째 공개 GPX 원본 좌표</p>
+      </div>
+      <div class="card">
+        <h3>RDP 방식</h3>
+        <p>경로의 전체 형태를 최대한 유지하면서 <b>불필요한 중간 좌표를 제거</b>합니다.</p>
+        <p class="small"><b>epsilon</b> = 두 유지점 사이 직선에서 중간 좌표가 벗어날 수 있는 허용 거리</p>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:18px">
+      공개 러닝 GPX를 먼저 약 5m 간격으로 공간 샘플링한 뒤,
+      RDP 1m / 2m / 2.5m / 3m / 5m를 각각 비교했습니다.
+    </div>
+  </section>
+
+  <!-- 13 RDP1 -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">12 · RDP 실험 1</div>
+      <div class="week">일반 러닝 코스</div>
+    </div>
+    <h2>일반 코스: 좌표 감소 효과 비교</h2>
+    <div class="grid2">
+      <div>
+        <table>
+          <tr><th>단계</th><th>좌표 수</th><th>감소율*</th></tr>
+          <tr><td>원본 GPX</td><td>3,924</td><td>-</td></tr>
+          <tr><td>5m 샘플링</td><td>1,672</td><td>-</td></tr>
+          <tr><td>RDP 1m</td><td>356</td><td>78.71%</td></tr>
+          <tr><td>RDP 2m</td><td>218</td><td>86.96%</td></tr>
+          <tr class="selected"><td>RDP 2.5m</td><td>187</td><td>88.82%</td></tr>
+          <tr><td>RDP 3m</td><td>167</td><td>90.01%</td></tr>
+          <tr><td>RDP 5m</td><td>114</td><td>93.18%</td></tr>
+        </table>
+        <p class="small">* 감소율은 5m 샘플링 결과 1,672개 기준</p>
+        <div class="callout">
+          2m와 2.5m는 형태 차이가 거의 없지만, <b>218개 → 187개</b>로 좌표 수가 더 감소했습니다.
+        </div>
+      </div>
+      <div class="images3">
+        <div class="figure"><img src="이미지/gps_org.png"><div class="cap">원본 GPX</div></div>
+        <div class="figure"><img src="이미지/gps5m.png"><div class="cap">5m 샘플링</div></div>
+        <div class="figure"><img src="이미지/rdp2m.png"><div class="cap">RDP 2m · 218개</div></div>
+        <div class="figure"><img src="이미지/rdp2.5m.png"><div class="cap">RDP 2.5m · 187개</div></div>
+        <div class="figure"><img src="이미지/rdp3m.png"><div class="cap">RDP 3m · 167개</div></div>
+        <div class="figure"><img src="이미지/rdp5m.png"><div class="cap">RDP 5m · 114개</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 14 RDP2 -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">13 · RDP 실험 2</div>
+      <div class="week">트랙 코스</div>
+    </div>
+    <h2>곡선이 많은 트랙 코스: 형태 보존 비교</h2>
+    <div class="grid2">
+      <div>
+        <table>
+          <tr><th>epsilon</th><th>좌표 수</th><th>감소율</th></tr>
+          <tr><td>1m</td><td>176</td><td>27.57%</td></tr>
+          <tr><td>2m</td><td>164</td><td>32.51%</td></tr>
+          <tr class="selected"><td>2.5m</td><td>161</td><td>33.74%</td></tr>
+          <tr><td>3m</td><td>154</td><td>36.63%</td></tr>
+          <tr><td>5m</td><td>136</td><td>44.03%</td></tr>
+        </table>
+        <p class="small">원본 245개 → 5m 샘플링 243개</p>
+        <div class="callout">
+          5m는 곡선이 눈에 띄게 단순화되고, 3m부터도 약간의 형태 감소가 보였습니다.
+          <b>2m와 2.5m는 육안상 거의 차이가 없었습니다.</b>
+        </div>
+      </div>
+      <div class="images4">
+        <div class="figure"><img src="이미지/01-original.png"><div class="cap">원본</div></div>
+        <div class="figure"><img src="이미지/02-sampled-5m.png"><div class="cap">5m 샘플링</div></div>
+        <div class="figure"><img src="이미지/03-rdp-1m.png"><div class="cap">RDP 1m</div></div>
+        <div class="figure"><img src="이미지/04-rdp-2m.png"><div class="cap">RDP 2m</div></div>
+        <div class="figure"><img src="이미지/05-rdp-2.5m.png"><div class="cap">RDP 2.5m</div></div>
+        <div class="figure"><img src="이미지/06-rdp-3m.png"><div class="cap">RDP 3m</div></div>
+        <div class="figure"><img src="이미지/07-rdp-5m.png"><div class="cap">RDP 5m</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 Conclusion -->
+  <section class="slide">
+    <div class="header">
+      <div class="kicker">14 · 결론 / 다음 주</div>
+      <div class="week">9주차 마무리</div>
+    </div>
+    <h2>현재 RDP epsilon 후보: 2.5m</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3>2.5m를 선택한 이유</h3>
+        <ul>
+          <li><b>1m</b>: 형태는 잘 유지되지만 좌표 감소 효과가 상대적으로 낮음</li>
+          <li><b>2m</b>: 안정적이지만 2.5m보다 좌표가 더 많이 남음</li>
+          <li><b>2.5m</b>: 2m와 형태 차이는 거의 없고 좌표는 더 감소</li>
+          <li><b>3m 이상</b>: 곡선이 많은 코스에서 단순화가 보이기 시작</li>
+          <li><b>5m</b>: 트랙 곡선 형태 변화가 큼</li>
+        </ul>
+        <p class="small">실제 ShareFit 사용자 GPS 데이터가 확보되면 다시 조정할 수 있습니다.</p>
+      </div>
+      <div class="card">
+        <h3>다음 주 계획</h3>
+        <p><b>① 남은 운동/러닝 API 구현 마무리</b></p>
+        <p><b>② 실제 DB 기준 통합 테스트</b></p>
+        <p class="small">API 요청 → Service → JPA → MySQL 저장/조회까지 전체 흐름 확인</p>
+        <div class="callout" style="margin-top:14px">
+          목표: 기능별 API 구현을 마무리하고 실제 DB 기준 통합 테스트 단계로 이동
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="progress" id="progress"></div>
+<div class="nav">
+  <button id="prev">← 이전</button>
+  <div class="counter" id="counter"></div>
+  <button id="next">다음 →</button>
+</div>
+
+<script>
+  const slides = [...document.querySelectorAll(".slide")];
+  let index = 0;
+  const counter = document.getElementById("counter");
+  const progress = document.getElementById("progress");
+
+  function show(i){
+    index = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s,n)=>s.classList.toggle("active", n===index));
+    counter.textContent = `${index + 1} / ${slides.length}`;
+    progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+  }
+
+  document.getElementById("prev").onclick = ()=>show(index - 1);
+  document.getElementById("next").onclick = ()=>show(index + 1);
+
+  document.addEventListener("keydown",(e)=>{
+    if(e.key==="ArrowRight" || e.key==="PageDown" || e.key===" "){
+      e.preventDefault();
+      show(index + 1);
+    }
+    if(e.key==="ArrowLeft" || e.key==="PageUp"){
+      e.preventDefault();
+      show(index - 1);
+    }
+    if(e.key==="Home") show(0);
+    if(e.key==="End") show(slides.length - 1);
+  });
+
+  show(0);
+</script>
+</body>
+</html>
