@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>ShareFit 백엔드 API 구현 및 MySQL 통합 테스트</title>
+    <style>
+      :root {
+        --blue: #5267e8;
+        --ink: #111827;
+        --muted: #6b7280;
+        --line: #d9e0ea;
+        --soft: #f5f7fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Pretendard", "Noto Sans KR",
+          "Segoe UI", sans-serif;
+        background: #eef2f7;
+        color: var(--ink);
+      }
+      body {
+        overflow: hidden;
+      }
+      .slide {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        padding: 46px 64px 92px;
+        background: linear-gradient(180deg, #fff 0%, #fbfcfe 100%);
+        overflow: hidden;
+      }
+      .slide.active {
+        display: block;
+      }
+      .kicker {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--blue);
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+      }
+      h1 {
+        font-size: 42px;
+        line-height: 1.16;
+        margin: 0 0 18px;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+      }
+      h2 {
+        font-size: 31px;
+        line-height: 1.22;
+        margin: 0 0 20px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+      h3 {
+        font-size: 21px;
+        margin: 0 0 10px;
+      }
+      p,
+      li {
+        font-size: 19px;
+        line-height: 1.55;
+      }
+      .small {
+        font-size: 14px;
+        color: var(--muted);
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+        align-items: stretch;
+      }
+      .grid3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
+      }
+      .card.blue {
+        background: #f7f9ff;
+        border-color: #ccd6ff;
+      }
+      .flow {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .node {
+        padding: 11px 15px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        font-weight: 800;
+        font-size: 17px;
+      }
+      .arrow {
+        font-weight: 900;
+        color: #778196;
+      }
+      .callout {
+        border-left: 5px solid var(--blue);
+        padding: 14px 16px;
+        background: #f5f7ff;
+        border-radius: 10px;
+        font-size: 18px;
+        line-height: 1.5;
+      }
+      .code {
+        background: #0f172a;
+        color: #e5e7eb;
+        border-radius: 15px;
+        padding: 18px 20px;
+        font:
+          14px/1.5 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+        white-space: pre-wrap;
+        overflow: auto;
+        max-height: 56vh;
+      }
+      .code.smallcode {
+        font-size: 12px;
+        line-height: 1.45;
+      }
+      img.shot {
+        width: 100%;
+        height: auto;
+        max-height: 55vh;
+        object-fit: contain;
+        border: 1px solid #20252d;
+        border-radius: 12px;
+        background: #111;
+      }
+      .imgcap {
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 6px;
+      }
+      .compare {
+        display: grid;
+        grid-template-columns: 1fr 64px 1fr;
+        gap: 12px;
+        align-items: center;
+      }
+      .centerarrow {
+        text-align: center;
+        font-size: 40px;
+        font-weight: 900;
+        color: var(--blue);
+      }
+      .nav {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 66px;
+        background: rgba(255, 255, 255, 0.95);
+        border-top: 1px solid var(--line);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+      }
+      .nav button,
+      .home {
+        border: 1px solid var(--line);
+        background: #fff;
+        color: #273142;
+        border-radius: 10px;
+        padding: 9px 16px;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+      }
+      .home {
+        position: absolute;
+        left: 22px;
+      }
+      .counter {
+        min-width: 70px;
+        text-align: center;
+        font-size: 14px;
+        color: var(--muted);
+        font-weight: 800;
+      }
+      .progress {
+        position: fixed;
+        left: 0;
+        bottom: 66px;
+        height: 3px;
+        background: var(--blue);
+        z-index: 30;
+        transition: 0.2s;
+      }
+      .topline {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 5px;
+        background: var(--blue);
+        z-index: 30;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topline"></div>
+
+    <section class="slide active">
+      <div class="kicker">ShareFit · 백엔드 개발</div>
+      <h1>API 구현 마무리 및 실제 MySQL 통합 테스트</h1>
+      <div class="grid2" style="margin-top: 28px">
+        <div class="card blue">
+          <h2>헬스 종목 처리 보강</h2>
+          <p>
+            헬스 종목 조회와 운동 시작 흐름을 구현하면서 직접 입력 종목 처리
+            누락 확인함
+          </p>
+          <p>
+            기존 종목과 중복되는 직접 입력값은 새로 만들지 않고 기존 종목
+            재사용하도록 수정함
+          </p>
+        </div>
+        <div class="card blue">
+          <h2>실제 DB 통합 테스트</h2>
+          <p>앱 연결 전 실제 HTTP 요청으로 Spring Boot ↔ MySQL 동작 확인함</p>
+          <p>
+            러닝 시작 → 좌표 저장 → 운동 완료 → RDP 적용 → 조회 응답까지 확인함
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">헬스 종목 조회 API</div>
+      <h2>운동 시작 전 종목을 선택하는 흐름</h2>
+      <div class="card">
+        <div class="flow">
+          <div class="node">운동 화면</div>
+          <div class="arrow">→</div>
+          <div class="node">부위 선택</div>
+          <div class="arrow">→</div>
+          <div class="node">GET /body-parts/exercises</div>
+          <div class="arrow">→</div>
+          <div class="node">종목 선택</div>
+          <div class="arrow">→</div>
+          <div class="node">POST /workouts/strength</div>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top: 22px">
+        <div class="card">
+          <h3>기존 종목 선택</h3>
+          <p>부위별 운동 종목 목록 조회함</p>
+          <p>
+            사용자가 종목을 선택하면 해당 <b>exerciseId</b>를 운동 시작 요청에
+            포함함
+          </p>
+          <p>
+            운동 시작 시 선택한 종목을 해당 사용자의 헬스 운동 기록에 저장함
+          </p>
+        </div>
+        <div class="card">
+          <h3>구현하면서 확인한 누락</h3>
+          <p>앱에는 목록에 없는 운동을 <b>직접 입력</b>하는 기능도 있음</p>
+          <p>
+            초기 API 목록에는 직접 입력한 종목을 저장하는 처리가 빠져 있었음
+          </p>
+          <p>따라서 직접 입력 종목 생성·재사용 로직 추가함</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">직접 입력 종목 처리 보강</div>
+      <h2>기존 종목이면 재사용하고, 없을 때만 개인 종목 생성함</h2>
+      <div class="grid2" style="grid-template-columns: 0.95fr 1.05fr">
+        <div class="card">
+          <h3>처리 방식</h3>
+          <p>
+            직접 입력값이 들어오면 같은 부위의 기본 종목과 내가 만든 활성 종목을
+            먼저 조회함
+          </p>
+          <p>이름 비교 시 공백 제거함</p>
+          <p>같은 종목 있으면 기존 exerciseId 재사용함</p>
+          <p>없을 때만 새 개인 종목 생성함</p>
+          <div class="callout">
+            예: <b>벤치프레스</b>와 <b>벤치 프레스</b>는 같은 종목으로 판단함
+          </div>
+        </div>
+        <div class="code smallcode">
+          // 같은 부위의 기본 종목 + 내가 만든 활성 종목 조회
+var existing = jdbc.query("""
+    SELECT exercise_id, name
+    FROM exercises
+    WHERE (created_by_user_id IS NULL
+        OR created_by_user_id = ?)
+      AND body_part_id = ?
+      AND is_active = true
+    """,
+    (rs, row) -> new Catalog(
+        rs.getLong("exercise_id"),
+        rs.getString("name")
+    ),
+    user,
+    body
+).stream()
+
+// 공백을 제거해서 같은 이름인지 비교
+.filter(c ->
+    normalizeName(c.name())
+        .equalsIgnoreCase(normalizeName(clean))
+)
+.findFirst();
+
+// 같은 종목이 있으면 새로 만들지 않고 기존 종목 재사용
+if (existing.isPresent()) {
+    return existing.get();
+}
+
+// 종목명 비교 전에 모든 공백 제거
+private static String normalizeName(String name) {
+    return name.replaceAll("(?U)\\s+", "");
+}
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">실제 MySQL 통합 테스트</div>
+      <h2>앱 연결 전 실제 HTTP 요청으로 서버와 DB 동작 확인함</h2>
+      <div class="grid2">
+        <div class="card">
+          <h3>확인 목적</h3>
+          <p>
+            API 구현은 끝났지만 실제 MySQL에 연결했을 때 요청·저장·조회가 정상
+            동작하는지 확인 필요했음
+          </p>
+          <p>저번 주에 확인했던 러닝 흐름을 실제 DB 기준으로 다시 검증함</p>
+          <div class="flow" style="margin-top: 16px">
+            <div class="node">HTTP 요청</div>
+            <div class="arrow">→</div>
+            <div class="node">Spring Boot</div>
+            <div class="arrow">→</div>
+            <div class="node">MySQL</div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>Python 사용 이유</h3>
+          <p>
+            IntelliJ에서 HTTP 요청 기능을 사용하려 했지만 해당 기능 사용에
+            구독이 필요했음
+          </p>
+          <p>따라서 Python의 <b>urllib</b>로 실제 HTTP 요청 보냄</p>
+          <p>
+            서버 함수를 직접 실행한 것이 아니라 실제 실행 중인 Spring Boot
+            서버를 거친 테스트임
+          </p>
+          <div class="code">[ Python urllib 요청 코드 삽입 예정 ]</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">테스트 데이터 준비</div>
+      <h2>테스트 사용자와 진행 중인 러닝 운동 데이터 준비함</h2>
+      <div class="grid3">
+        <div>
+          <img class="shot" src="image/UserTable.png" />
+          <div class="imgcap">users · 테스트 사용자</div>
+        </div>
+        <div>
+          <img class="shot" src="image/workout1.png" />
+          <div class="imgcap">workouts · RUNNING / IN_PROGRESS</div>
+        </div>
+        <div>
+          <img class="shot" src="image/RunTable.png" />
+          <div class="imgcap">
+            running_details · 목표거리 10000m / 현재거리 0m
+          </div>
+        </div>
+      </div>
+      <div class="callout" style="margin-top: 16px">
+        실제 API 호출 전 테스트 사용자, 러닝 운동, 러닝 상세 데이터 준비함
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">러닝 좌표 저장 API</div>
+      <h2>좌표 5개 저장 후 전체 243개까지 순서대로 저장 확인함</h2>
+      <div class="grid2">
+        <div>
+          <img class="shot" src="image/running-route1.png" />
+          <div class="imgcap">첫 요청 · point_order 1~5 저장 확인</div>
+        </div>
+        <div>
+          <img class="shot" src="image/running-route2.png" />
+          <div class="imgcap">전체 저장 · point_order 243까지 확인</div>
+        </div>
+      </div>
+      <div class="code smallcode" style="margin-top: 14px; max-height: 24vh">
+        POST {{baseUrl}}/running-route-points Authorization: Bearer {{idToken}}
+        Content-Type: application/json { "workoutId": 1, "distanceM": 87.07,
+        "points": [
+        {"pointOrder":1,"segmentNo":1,"latitude":35.4992416,"longitude":-80.8434449,"recordedAt":"2026-11-02T20:44:09.887","accuracyM":null},
+        {"pointOrder":2,"segmentNo":1,"latitude":35.4990461,"longitude":-80.8434172,"recordedAt":"2026-11-02T20:44:12.887","accuracyM":null},
+        {"pointOrder":3,"segmentNo":1,"latitude":35.4988782,"longitude":-80.8432915,"recordedAt":"2026-11-02T20:44:15.887","accuracyM":null},
+        {"pointOrder":4,"segmentNo":1,"latitude":35.4987893,"longitude":-80.8430928,"recordedAt":"2026-11-02T20:44:18.887","accuracyM":null},
+        {"pointOrder":5,"segmentNo":1,"latitude":35.4987845,"longitude":-80.8428410,"recordedAt":"2026-11-02T20:44:21.887","accuracyM":null}
+        ] }
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">운동 완료 API</div>
+      <h2>운동 완료 후 RDP 적용, 상태 변경, 최종 거리 저장 확인함</h2>
+      <div class="grid2" style="grid-template-columns: 1.05fr 0.95fr">
+        <div>
+          <div class="compare">
+            <div>
+              <img class="shot" src="image/running-route2.png" />
+              <div class="imgcap">완료 전 · 좌표 243개 저장</div>
+            </div>
+            <div class="centerarrow">→</div>
+            <div>
+              <img class="shot" src="image/runningRDP.png" />
+              <div class="imgcap">완료 후 · RDP 2.5m 적용</div>
+            </div>
+          </div>
+          <div class="grid2" style="margin-top: 12px">
+            <div>
+              <img class="shot" src="image/workout2.png" />
+              <div class="imgcap">workouts · COMPLETED / ended_at 저장</div>
+            </div>
+            <div>
+              <img class="shot" src="image/RunTable2.png" />
+              <div class="imgcap">running_details · distance_m = 5234.77</div>
+            </div>
+          </div>
+        </div>
+        <div class="code">
+          ### Complete workout 1 PATCH {{baseUrl}}/workouts/1/complete
+          Authorization: Bearer {{idToken}} Content-Type: application/json {
+          "distanceM": 5234.77 }
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">완료 기록 조회</div>
+      <h2>완료된 러닝 기록 조회 응답까지 정상 확인함</h2>
+      <div class="grid2" style="grid-template-columns: 1.15fr 0.85fr">
+        <div>
+          <img class="shot" src="image/GETrunning.png" />
+          <div class="imgcap">GET /workouts/1/running · HTTP 200</div>
+        </div>
+        <div>
+          <div class="code">
+            ### 운동 1번 러닝 기록 상세 조회 GET {{baseUrl}}/workouts/1/running
+            Authorization: Bearer {{idToken}}
+          </div>
+          <div class="callout" style="margin-top: 18px">
+            HTTP 200 확인함<br />status = COMPLETED 확인함<br />distanceM =
+            5234.77 확인함<br />실제 DB 저장값과 API 응답 일치함
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide">
+      <div class="kicker">다음 단계</div>
+      <h2>다른 API도 같은 방식으로 실제 DB 기준 검증 후 앱 연동 진행 예정</h2>
+      <div class="grid2" style="margin-top: 24px">
+        <div class="card blue">
+          <h3>실제 DB 검증 확대</h3>
+          <p>
+            친구 / 헬스 / 루틴 / 랭킹 API도 같은 방식으로 실제 MySQL에서 확인할
+            예정임
+          </p>
+        </div>
+        <div class="card blue">
+          <h3>Flutter API 연동</h3>
+          <div class="flow" style="margin-top: 18px">
+            <div class="node">Flutter</div>
+            <div class="arrow">→</div>
+            <div class="node">Spring Boot</div>
+            <div class="arrow">→</div>
+            <div class="node">MySQL</div>
+          </div>
+          <p style="margin-top: 18px">
+            실제 앱에서 Firebase ID Token을 포함해 서버 API 호출하도록 전환
+            예정임
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="progress" id="progress"></div>
+    <div class="nav">
+      <a class="home" href="index.html">← 메인으로</a>
+      <button id="prev">← 이전</button>
+      <div class="counter" id="counter"></div>
+      <button id="next">다음 →</button>
+    </div>
+
+    <script>
+      const slides = [...document.querySelectorAll(".slide")];
+      let idx = 0;
+      const counter = document.getElementById("counter");
+      const progress = document.getElementById("progress");
+      function show(i) {
+        idx = Math.max(0, Math.min(i, slides.length - 1));
+        slides.forEach((s, n) => s.classList.toggle("active", n === idx));
+        counter.textContent = idx + 1 + " / " + slides.length;
+        progress.style.width = ((idx + 1) / slides.length) * 100 + "%";
+      }
+      document.getElementById("prev").onclick = () => show(idx - 1);
+      document.getElementById("next").onclick = () => show(idx + 1);
+      document.addEventListener("keydown", (e) => {
+        if (["ArrowRight", "PageDown", " "].includes(e.key)) show(idx + 1);
+        if (["ArrowLeft", "PageUp"].includes(e.key)) show(idx - 1);
+        if (e.key === "Home") show(0);
+        if (e.key === "End") show(slides.length - 1);
+      });
+      show(0);
+    </script>
+  </body>
+</html>
