@@ -1,0 +1,1088 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ShareFit · 사용자·친구 API 연동 발표</title>
+    <style>
+      :root {
+        --blue: #5267e8;
+        --ink: #101829;
+        --muted: #667085;
+        --line: #dce2ee;
+        --light: #f4f6ff;
+        --code: #111a2d;
+        --danger: #d84d60;
+        --ok: #23865c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        font-family:
+          Pretendard,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Noto Sans KR",
+          sans-serif;
+        color: var(--ink);
+        background: #e9edf7;
+      }
+      body {
+        overflow: hidden;
+      }
+      .slide {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 38px 4.6vw 86px;
+        background: #fff;
+      }
+      .slide.active {
+        display: block;
+      }
+      h1 {
+        font-size: clamp(29px, 3.1vw, 45px);
+        line-height: 1.15;
+        margin: 4px 0 22px;
+        letter-spacing: -0.035em;
+      }
+      h2 {
+        font-size: clamp(24px, 2.55vw, 36px);
+        line-height: 1.2;
+        margin: 0 0 20px;
+        letter-spacing: -0.035em;
+      }
+      h3 {
+        font-size: 19px;
+        margin: 0 0 10px;
+        letter-spacing: -0.02em;
+      }
+      p,
+      li {
+        font-size: clamp(14px, 1.19vw, 17px);
+        line-height: 1.52;
+        margin: 9px 0;
+      }
+      .eyebrow {
+        font-size: 14px;
+        color: var(--blue);
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+      .sub {
+        color: var(--muted);
+        font-size: 18px;
+        margin: -5px 0 22px;
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 17px 20px;
+        min-width: 0;
+        background: #fff;
+      }
+      .tint {
+        background: #f7f8fe;
+      }
+      .softline {
+        border-top: 1px solid var(--line);
+        margin: 14px 0;
+      }
+      .grid2 {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 18px;
+      }
+      .layout-user {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: 26px;
+        align-items: start;
+      }
+      .layout-friend {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+        gap: 23px;
+        align-items: start;
+      }
+      .photo-pair {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        align-items: flex-start;
+        min-width: 0;
+      }
+      .phone-pic {
+        display: block;
+        width: auto;
+        height: min(58vh, 570px);
+        max-width: calc(50% - 10px);
+        object-fit: contain;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        background: transparent;
+      }
+      .phone-pic.single {
+        max-width: 100%;
+        height: min(57vh, 570px);
+        margin: auto;
+      }
+      .phone-pic.short {
+        height: min(41vh, 400px);
+      }
+      .db-pic {
+        display: block;
+        max-width: 100%;
+        width: 100%;
+        height: auto;
+        max-height: 25vh;
+        object-fit: contain;
+        background: transparent;
+        border: 0;
+      }
+      .db-pic.tall {
+        max-height: 40vh;
+      }
+      .cap {
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+        margin-top: 6px;
+      }
+      .media-no-card {
+        min-width: 0;
+        text-align: center;
+      }
+      /* 영상 하나를 발표 화면 중앙에 크게 표시 */
+      .video-single {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: calc(100vh - 210px);
+        min-height: 0;
+      }
+
+      /* 원본 영상 비율 유지 */
+      .video-single video {
+        display: block;
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+        object-fit: contain;
+
+        border-radius: 12px;
+        background: #000;
+      }
+      .note {
+        background: #f4f6ff;
+        border-left: 4px solid var(--blue);
+        border-radius: 9px;
+        padding: 12px 16px;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-top: 15px;
+      }
+      .note.warn {
+        background: #fff3f4;
+        border-left-color: var(--danger);
+      }
+      .tag {
+        display: inline-block;
+        color: #435ae5;
+        background: #eff2ff;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 13px;
+        font-weight: 800;
+        margin-bottom: 12px;
+      }
+      .code {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        overflow-x: hidden;
+        overflow-y: auto;
+        max-width: 100%;
+        max-height: 38vh;
+        margin: 0;
+        background: var(--code);
+        color: #edf2ff;
+        border-radius: 13px;
+        padding: 15px 17px;
+        font:
+          clamp(11px, 0.9vw, 14px)/1.62 SFMono-Regular,
+          Menlo,
+          Consolas,
+          monospace;
+        tab-size: 2;
+        text-align: left;
+      }
+      .code code {
+        font: inherit;
+      }
+      .code .comment {
+        color: #9daed0;
+      }
+      .code .endpoint {
+        color: #c3cfff;
+      }
+      .smallcode {
+        font-size: clamp(10px, 0.79vw, 13px);
+      }
+      .codepanel {
+        min-width: 0;
+      }
+      .codepanel h3 {
+        margin: 0 0 11px;
+      }
+      .codepanel .code {
+        max-height: 44vh;
+      }
+      .pills {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .pill {
+        border: 1px solid #ced8ff;
+        border-radius: 12px;
+        background: #f7f8ff;
+        padding: 9px 13px;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .arrow {
+        color: var(--blue);
+        font-size: 20px;
+        font-weight: 900;
+      }
+      .sequence {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 15px;
+        overflow: hidden;
+        padding: 14px 18px 12px;
+        background: #fff;
+      }
+      .lanes {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0;
+      }
+      .lanehead {
+        text-align: center;
+        padding: 12px 4px;
+        border: 1px solid #d8deef;
+        border-radius: 9px;
+        background: #f3f5ff;
+        font-size: 14px;
+        font-weight: 800;
+        margin: 0 9px;
+      }
+      .lanehead:nth-child(2) {
+        background: #fff8ed;
+      }
+      .lanehead:nth-child(4) {
+        background: #effaf5;
+      }
+      .seqbody {
+        position: relative;
+        height: 365px;
+        margin-top: 12px;
+        background-image:
+          linear-gradient(
+            to right,
+            transparent calc(12.5% - 1px),
+            #d5dce9 calc(12.5% - 1px),
+            #d5dce9 calc(12.5% + 1px),
+            transparent calc(12.5% + 1px)
+          ),
+          linear-gradient(
+            to right,
+            transparent calc(37.5% - 1px),
+            #d5dce9 calc(37.5% - 1px),
+            #d5dce9 calc(37.5% + 1px),
+            transparent calc(37.5% + 1px)
+          ),
+          linear-gradient(
+            to right,
+            transparent calc(62.5% - 1px),
+            #d5dce9 calc(62.5% - 1px),
+            #d5dce9 calc(62.5% + 1px),
+            transparent calc(62.5% + 1px)
+          ),
+          linear-gradient(
+            to right,
+            transparent calc(87.5% - 1px),
+            #d5dce9 calc(87.5% - 1px),
+            #d5dce9 calc(87.5% + 1px),
+            transparent calc(87.5% + 1px)
+          );
+        background-repeat: no-repeat;
+      }
+      .seqline {
+        position: absolute;
+        height: 0;
+        border-top: 2px solid #50627f;
+        left: var(--l);
+        width: var(--w);
+        top: var(--y);
+      }
+      .seqline:after {
+        content: "";
+        position: absolute;
+        right: -1px;
+        top: -6px;
+        border-left: 9px solid #50627f;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+      }
+      .seqline.reverse:after {
+        right: auto;
+        left: -1px;
+        transform: rotate(180deg);
+      }
+      .seqline.reverse {
+        border-color: #8793aa;
+      }
+      .seqtext {
+        position: absolute;
+        left: var(--l);
+        width: var(--w);
+        top: calc(var(--y) - 25px);
+        text-align: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: #34445f;
+        white-space: nowrap;
+      }
+      .seqevent {
+        position: absolute;
+        top: var(--y);
+        left: var(--l);
+        max-width: 33%;
+        padding: 6px 8px;
+        border-radius: 8px;
+        background: #fff5db;
+        border: 1px solid #e7bf67;
+        font-size: 11px;
+        font-weight: 750;
+      }
+      .seqevent.bad {
+        background: #ffeaf0;
+        border-color: #de8397;
+      }
+      .seqevent.good {
+        background: #e9f7ef;
+        border-color: #8fc4a7;
+      }
+      .seqcaption {
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 11px;
+      }
+      .compare-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 20px;
+      }
+      .compare-row .card {
+        min-width: 0;
+      }
+      .videos {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+      }
+      .video-item {
+        min-width: 0;
+      }
+      .video-item video {
+        display: block;
+        width: 100%;
+        height: 42vh;
+        object-fit: contain;
+        background: #101827;
+        border-radius: 13px;
+      }
+      .video-item h3 {
+        margin: 0 0 9px;
+      }
+      .video-item .cap {
+        text-align: left;
+      }
+      .foot {
+        height: 61px;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(255, 255, 255, 0.97);
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 13px;
+        z-index: 10;
+      }
+      .foot button {
+        font-size: 14px;
+        font-weight: 800;
+        color: #27324a;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        padding: 9px 16px;
+        cursor: pointer;
+      }
+      .foot .count {
+        font-size: 13px;
+        min-width: 55px;
+        text-align: center;
+        color: var(--muted);
+      }
+      .progress {
+        height: 3px;
+        position: fixed;
+        bottom: 61px;
+        left: 0;
+        background: var(--blue);
+        z-index: 11;
+        transition: width 0.2s;
+      }
+      .home {
+        position: absolute;
+        left: 20px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .detaillist {
+        padding-left: 21px;
+        margin: 7px 0;
+      }
+      .detaillist li {
+        margin: 7px 0;
+      }
+      .metric {
+        font-size: 34px;
+        font-weight: 900;
+        color: var(--blue);
+      }
+      @media (max-width: 1100px) {
+        .slide {
+          padding: 30px 3vw 82px;
+        }
+        .layout-user,
+        .layout-friend {
+          gap: 17px;
+        }
+        .phone-pic {
+          height: 48vh;
+        }
+        .code {
+          font-size: 11px;
+        }
+        .seqbody {
+          height: 310px;
+        }
+        .videos {
+          gap: 10px;
+        }
+      }
+      @media (max-width: 740px) {
+        .slide {
+          overflow: auto;
+        }
+        .layout-user,
+        .layout-friend,
+        .compare-row,
+        .grid2 {
+          grid-template-columns: 1fr;
+        }
+        .phone-pic {
+          height: 35vh;
+        }
+        .seqtext {
+          font-size: 9px;
+        }
+        .videos {
+          grid-template-columns: 1fr;
+        }
+        .video-item video {
+          height: 25vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <section class="slide">
+      <div class="eyebrow">SHAREFIT · 이번 주 개발</div>
+      <h2>Flutter 앱에 사용자·친구 API 연동</h2>
+      <p class="sub">
+        지난주: Spring Boot API와 MySQL 테스트 → 이번 주: 실제 Flutter 앱 연결
+        및 기능 검증
+      </p>
+      <div class="grid2" style="margin-top: 28px">
+        <div class="card tint">
+          <span class="tag">사용자 API</span>
+          <h3>회원 등록 · 조회 · 탈퇴</h3>
+          <p>기존 Firebase 계정 로그인 후 MySQL 회원 자동 생성 확인함</p>
+          <p>탈퇴 후 회원 정보 삭제되는 것도 확인함</p>
+        </div>
+        <div class="card tint">
+          <span class="tag">친구 API</span>
+          <h3>요청 · 수락 · 삭제 · 재요청</h3>
+          <p>친구 요청 목록과 홈 화면 친구 상태 표시 확인함</p>
+          <p>깨우기 푸시는 기기 토큰 미등록 문제로 별도 확인 중임</p>
+        </div>
+      </div>
+      <div class="note" style="margin-top: 26px">
+        테스트 환경: iPhone 시뮬레이터 → 로컬 Spring Boot 서버 → 로컬 MySQL ·
+        AWS 배포 전 단계임
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">01 · 사용자 API</div>
+      <h2>로그인 후 MySQL 회원 자동 생성 확인</h2>
+      <div class="layout-user">
+        <div class="media-no-card">
+          <div class="photo-pair">
+            <img
+              class="phone-pic"
+              src="image/login.png"
+              alt="로그인 화면"
+              loading="eager"
+            /><img
+              class="phone-pic"
+              src="image/signup.png"
+              alt="회원가입 화면"
+              loading="eager"
+            />
+          </div>
+          <div class="cap">앱 로그인 화면 / 회원가입 화면</div>
+        </div>
+        <div style="min-width: 0">
+          <div class="media-no-card">
+            <img
+              class="db-pic"
+              src="image/user_db.png"
+              alt="users 테이블"
+              loading="eager"
+            />
+            <div class="cap">MySQL users 테이블 · user_id=2 생성 확인</div>
+          </div>
+          <div class="card tint" style="margin-top: 16px">
+            <h3>확인한 과정</h3>
+            <p>API 연동 이전에 가입한 Firebase 계정으로 로그인함</p>
+            <p>로그인 전 MySQL에는 해당 회원 정보가 없었음</p>
+            <p>로그인 후 서버에서 MySQL 회원 정보가 생성된 것 확인함</p>
+          </div>
+        </div>
+      </div>
+      <div class="note">
+        Firebase Authentication은 로그인 인증 유지 · 회원 정보는 Spring Boot
+        <b>POST /users</b> 등으로 MySQL에서 관리함
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">01 · 사용자 API</div>
+      <h2>회원 저장 방식 변경 및 탈퇴 테스트</h2>
+      <div class="grid2">
+        <div class="codepanel">
+          <h3>연동 전 — Firestore 직접 저장</h3>
+          <pre
+            class="code"
+          ><code>// 연동 전: Flutter가 Firestore에 회원 정보를 직접 저장함
+transaction.set(userRef, {
+  &#x27;uid&#x27;: uid,
+  &#x27;email&#x27;: email,
+  &#x27;name&#x27;: name,
+  &#x27;friendCode&#x27;: friendCode,
+  &#x27;createdAt&#x27;: FieldValue.serverTimestamp(),
+});</code></pre>
+        </div>
+        <div class="codepanel">
+          <h3>연동 후 — Spring Boot API 호출</h3>
+          <pre
+            class="code"
+          ><code>// 연동 후: Flutter는 서버 API에 회원 정보를 전달함
+await _api.register({
+  &#x27;name&#x27;: old?[&#x27;name&#x27;] ?? name,
+  &#x27;email&#x27;: email,
+  &#x27;profileTitleCode&#x27;: custom.titleId,
+  &#x27;profileThemeCode&#x27;: custom.themeId,
+});
+
+// 내부 호출: POST /users
+// MySQL 저장·친구 코드 생성은 서버에서 처리함</code></pre>
+        </div>
+      </div>
+      <div
+        class="grid2"
+        style="
+          margin-top: 17px;
+          grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+          align-items: center;
+        "
+      >
+        <div class="media-no-card">
+          <img
+            class="phone-pic short"
+            src="image/withdraw.png"
+            alt="회원 탈퇴 확인 팝업"
+            loading="eager"
+          />
+          <div class="cap">앱 회원 탈퇴 확인 화면</div>
+        </div>
+        <div class="card tint">
+          <h3>DB 확인 결과</h3>
+          <p>① 기존 Firebase 회원 → MySQL에 없으면 신규 생성 확인함</p>
+          <p>② 앱에서 회원 탈퇴 → MySQL 사용자 정보 삭제 확인함</p>
+          <p style="font-size: 13px; color: var(--muted)">
+            탈퇴 후 DB 조회 캡처는 이번 자료에 포함하지 않음
+          </p>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">02 · 친구 API</div>
+      <h2>친구 요청부터 삭제·재요청까지 테스트</h2>
+      <div class="layout-friend">
+        <div style="min-width: 0">
+          <div class="card tint">
+            <h3>실제로 확인한 기능</h3>
+            <div class="pills">
+              <span class="pill">친구 요청</span><span class="arrow">→</span
+              ><span class="pill">보낸 요청 목록</span
+              ><span class="arrow">→</span><span class="pill">수락</span
+              ><span class="arrow">→</span><span class="pill">친구 삭제</span
+              ><span class="arrow">→</span><span class="pill">재요청</span>
+            </div>
+            <p>친구 관계를 수락한 뒤 홈 화면에 표시되는 것도 확인함</p>
+          </div>
+          <div class="media-no-card" style="margin-top: 17px">
+            <img
+              class="db-pic tall"
+              src="image/friend_request_db.png"
+              alt="친구 요청 테이블"
+              loading="eager"
+            />
+            <div class="cap">MySQL friend_requests · 친구 요청 저장 확인</div>
+          </div>
+        </div>
+        <div class="media-no-card">
+          <img
+            class="phone-pic single"
+            src="image/home.png"
+            alt="홈 화면 친구 상태"
+            loading="eager"
+          />
+          <div class="cap">홈 화면에 친구와 운동 상태 표시 확인</div>
+        </div>
+      </div>
+      <div class="note">
+        친구 요청 수락 시 <b>friend_requests</b>의 대기 요청은 삭제하고,
+        <b>friendships</b>에 관계를 저장하는 구조임
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">02 · 친구 API</div>
+      <h2>친구 요청 저장 방식 비교</h2>
+      <div class="grid2" style="margin-top: 10px">
+        <div class="codepanel">
+          <h3>연동 전 — Firestore 직접 저장</h3>
+          <pre
+            class="code"
+          ><code>// 연동 전: Flutter가 친구 요청을 Firestore에 직접 저장함
+transaction.set(requestRef, {
+  &#x27;fromUid&#x27;: uid,
+  &#x27;toUid&#x27;: target.uid,
+  &#x27;status&#x27;: &#x27;pending&#x27;,
+  &#x27;createdAt&#x27;: FieldValue.serverTimestamp(),
+  &#x27;updatedAt&#x27;: FieldValue.serverTimestamp(),
+});</code></pre>
+        </div>
+        <div class="codepanel">
+          <h3>연동 후 — POST /friend-requests</h3>
+          <pre
+            class="code"
+          ><code>// 연동 후: 친구 코드만 Spring Boot 서버에 전달함
+await _api.call(&#x27;POST&#x27;, &#x27;/friend-requests&#x27;, {
+  &#x27;friendCode&#x27;: target.friendCode,
+});
+
+// _api에서 Firebase ID Token을 자동으로 첨부함
+// 서버가 요청자·기존 친구·중복 요청 검사 후 저장함</code></pre>
+        </div>
+      </div>
+      <div class="note" style="margin-top: 28px">
+        <b>변경 핵심:</b> 앱에서 친구 요청 문서를 직접 저장하는 대신, 서버에
+        친구 코드 전달 → 인증과 중복 검사 → MySQL 저장으로 역할 분리함
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">03 · 회원가입 오류</div>
+      <h2>DB 이름과 마이 화면 이름이 일치하지 않음</h2>
+      <div
+        class="layout-user"
+        style="
+          grid-template-columns: minmax(0, 0.65fr) minmax(0, 1.35fr);
+          align-items: center;
+        "
+      >
+        <div class="media-no-card">
+          <img
+            class="phone-pic single"
+            src="image/my_wrong.png"
+            alt="마이 화면 잘못된 이름"
+            loading="eager"
+          />
+          <div class="cap">마이 화면: gangkang49 표시</div>
+        </div>
+        <div style="min-width: 0">
+          <div class="media-no-card">
+            <img
+              class="db-pic tall"
+              src="image/name_db.png"
+              alt="MySQL 저장된 올바른 이름"
+              loading="eager"
+            />
+            <div class="cap">MySQL: kanghyeon 저장</div>
+          </div>
+          <div class="card tint" style="margin-top: 17px">
+            <h3>원인 확인</h3>
+            <p>
+              마이 화면 API 연결 누락이 아니라
+              <b>회원가입 처리 순서가 겹친 문제</b>였음
+            </p>
+            <p>
+              Firebase가 로그인 상태를 먼저 알리면서, 입력한 이름 저장이 끝나기
+              전에 사용자 정보 조회·생성이 실행됨
+            </p>
+            <p>
+              이후 DB 이름이 수정되지만 마이 화면은 먼저 조회한 이름을 유지함
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">03 · 오류 원인 분석</div>
+      <h2>수정 전 — 이름 저장과 사용자 조회가 동시에 실행됨</h2>
+      <div class="sequence">
+        <div class="lanes">
+          <div class="lanehead">Flutter 앱</div>
+          <div class="lanehead">Firebase Auth</div>
+          <div class="lanehead">Spring Boot</div>
+          <div class="lanehead">MySQL</div>
+        </div>
+
+        <div class="seqbody" style="height: 680px">
+          <!-- 1. Firebase 회원가입 요청 -->
+          <div class="seqline" style="--l: 12.5%; --w: 25%; --y: 45px"></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 45px">
+            Firebase 계정 생성
+          </div>
+
+          <!-- 2. 계정 생성 직후 로그인 상태 감지 -->
+          <div
+            class="seqline reverse"
+            style="--l: 12.5%; --w: 25%; --y: 95px"
+          ></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 95px">
+            로그인 상태 변경 감지
+          </div>
+
+          <!-- 3. 이름 저장 전에 사용자 API 호출 -->
+          <div class="seqline" style="--l: 12.5%; --w: 50%; --y: 145px"></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 50%; --y: 145px">
+            사용자 조회·생성 API 호출
+          </div>
+
+          <!-- 4. 입력한 이름이 없어 임시 이름 저장 -->
+          <div class="seqline" style="--l: 62.5%; --w: 25%; --y: 195px"></div>
+          <div class="seqtext" style="--l: 62.5%; --w: 25%; --y: 195px">
+            임시 이름 저장: gangkang49
+          </div>
+
+          <!-- 5. MySQL 저장 결과 반환 -->
+          <div
+            class="seqline reverse"
+            style="--l: 62.5%; --w: 25%; --y: 245px"
+          ></div>
+          <div class="seqtext" style="--l: 62.5%; --w: 25%; --y: 245px">
+            저장 완료
+          </div>
+
+          <!-- 6. Flutter에 임시 사용자 정보 반환 -->
+          <div
+            class="seqline reverse"
+            style="--l: 12.5%; --w: 50%; --y: 295px"
+          ></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 50%; --y: 295px">
+            임시 이름 응답
+          </div>
+
+          <!-- 마이 화면에 잘못된 이름 표시 -->
+          <div class="seqevent bad" style="--y: 328px; --l: 4%">
+            화면: gangkang49
+          </div>
+
+          <!-- 7. 별도로 진행 중이던 회원가입 이름 저장 -->
+          <div class="seqline" style="--l: 12.5%; --w: 25%; --y: 395px"></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 395px">
+            입력한 이름 저장: kanghyeon
+          </div>
+
+          <!-- 8. Firebase 이름 저장 완료 -->
+          <div
+            class="seqline reverse"
+            style="--l: 12.5%; --w: 25%; --y: 445px"
+          ></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 445px">
+            이름 저장 완료
+          </div>
+
+          <!-- 9. Spring Boot에 올바른 이름 수정 요청 -->
+          <div class="seqline" style="--l: 12.5%; --w: 50%; --y: 495px"></div>
+          <div class="seqtext" style="--l: 12.5%; --w: 50%; --y: 495px">
+            이름 수정 API 요청
+          </div>
+
+          <!-- 10. MySQL 사용자 이름 수정 -->
+          <div class="seqline" style="--l: 62.5%; --w: 25%; --y: 545px"></div>
+          <div class="seqtext" style="--l: 62.5%; --w: 25%; --y: 545px">
+            이름 변경: kanghyeon
+          </div>
+
+          <!-- DB는 수정됐지만 마이 화면은 자동 갱신되지 않음 -->
+          <div class="seqevent bad" style="--y: 605px; --l: 4%">
+            화면: gangkang49
+          </div>
+
+          <div class="seqevent good" style="--y: 605px; --l: 79%">
+            DB: kanghyeon
+          </div>
+        </div>
+      </div>
+      <div class="note warn">
+        <b>경쟁 상태(Race Condition):</b> 로그인 감지로 조회가 먼저 진행됨 →
+        화면은 임시 이름을 받아 표시함 → 뒤늦게 DB가 수정되어도 화면은 자동
+        갱신되지 않음
+      </div>
+    </section>
+    <section class="slide">
+      <div class="eyebrow">03 · 비동기 처리 개선</div>
+      <h2>수정 후 — Completer로 회원가입 완료까지 대기</h2>
+      <div
+        class="grid2"
+        style="grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr)"
+      >
+        <div>
+          <div class="sequence">
+            <div class="lanes">
+              <div class="lanehead">Flutter 앱</div>
+              <div class="lanehead">Firebase Auth</div>
+              <div class="lanehead">Spring Boot</div>
+              <div class="lanehead">MySQL</div>
+            </div>
+            <div class="seqbody">
+              <div
+                class="seqline"
+                style="--l: 12.5%; --w: 25%; --y: 46px"
+              ></div>
+              <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 46px">
+                Firebase 계정 생성
+              </div>
+              <div
+                class="seqline reverse"
+                style="--l: 12.5%; --w: 25%; --y: 92px"
+              ></div>
+              <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 92px">
+                로그인 상태 감지
+              </div>
+              <div class="seqevent good" style="--y: 120px; --l: 4%">
+                Completer 대기
+              </div>
+              <div
+                class="seqline"
+                style="--l: 12.5%; --w: 25%; --y: 172px"
+              ></div>
+              <div class="seqtext" style="--l: 12.5%; --w: 25%; --y: 172px">
+                입력한 이름 저장
+              </div>
+              <div
+                class="seqline"
+                style="--l: 12.5%; --w: 50%; --y: 215px"
+              ></div>
+              <div class="seqtext" style="--l: 12.5%; --w: 50%; --y: 215px">
+                서버 사용자 생성·수정
+              </div>
+              <div
+                class="seqline"
+                style="--l: 62.5%; --w: 25%; --y: 254px"
+              ></div>
+              <div class="seqtext" style="--l: 62.5%; --w: 25%; --y: 254px">
+                name = kanghyeon
+              </div>
+              <div
+                class="seqline reverse"
+                style="--l: 62.5%; --w: 25%; --y: 291px"
+              ></div>
+              <div class="seqtext" style="--l: 62.5%; --w: 25%; --y: 291px">
+                저장 완료
+              </div>
+              <div
+                class="seqline reverse"
+                style="--l: 12.5%; --w: 50%; --y: 324px"
+              ></div>
+              <div class="seqtext" style="--l: 12.5%; --w: 50%; --y: 324px">
+                완료 후 사용자 정보 조회
+              </div>
+            </div>
+          </div>
+          <div class="cap">
+            회원가입 저장을 마친 뒤 사용자 정보 조회로 진행하도록 순서 제어함
+          </div>
+        </div>
+        <div class="codepanel">
+          <h3>수정 핵심 코드 (발췌)</h3>
+          <pre class="code"><code>// 가입 중인지 확인하고 완료될 때까지 대기함
+static Completer&lt;bool&gt;? _signUpCompletion;
+final pendingSignUp = _signUpCompletion;
+if (pendingSignUp != null &amp;&amp;
+    !await pendingSignUp.future) {
+  throw const ApiException(0, &#x27;회원가입 정보 저장 실패&#x27;);
+}
+
+// 회원가입 쪽: Firebase·서버 이름 저장이 끝나면 완료 신호 전달함
+await user.updateDisplayName(name);
+await _ensureServerUser(uid: user.uid,
+  email: email, name: name);
+await _api.update({&#x27;name&#x27;: name.trim()});
+completion.complete(succeeded);  // 실제 코드는 finally에서 호출</code></pre>
+        </div>
+      </div>
+    </section>
+    <!-- 친구 깨우기 오류 -->
+    <section class="slide">
+      <div class="eyebrow">04 · 친구 깨우기 오류</div>
+      <h2>친구 깨우기 기능 테스트 중 문제 발생</h2>
+
+      <div class="grid2" style="align-items: center">
+        <div class="card tint">
+          <h3>발생한 문제</h3>
+
+          <p style="font-size: 27px; font-weight: 800">
+            “친구의 알림 수신 기기가 등록되어 있지 않습니다.”
+          </p>
+
+          <p>친구 깨우기 버튼 클릭 시 해당 안내 메시지 출력됨</p>
+          <p>친구 기능은 연동됐지만 실제 푸시 알림은 전달되지 않음</p>
+        </div>
+
+        <div class="card">
+          <h3>확인 결과</h3>
+
+          <p>MySQL의 device_tokens 테이블에 저장된 데이터가 없었음</p>
+          <p>iOS에서 알림용 기기 토큰이 정상적으로 등록되지 않은 문제 확인함</p>
+          <p>
+            현재 iOS 푸시 설정 및 Apple 개발자 계정 문제로 실제 수신 테스트
+            보류함
+          </p>
+
+          <div class="note">
+            다음 주 Windows에서 Android 앱으로 깨우기 알림 수신 테스트 진행
+            예정임
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 실행 영상 1 -->
+    <section class="slide">
+      <div class="eyebrow">05 · 기능 실행 영상</div>
+      <h2>실제 앱–서버 API 동작 영상 ①</h2>
+
+      <div class="video-single">
+        <video
+          controls
+          preload="metadata"
+          playsinline
+          src="video/sharefit_demo1.mp4"
+        ></video>
+      </div>
+    </section>
+
+    <!-- 실행 영상 2 -->
+    <section class="slide">
+      <div class="eyebrow">05 · 기능 실행 영상</div>
+      <h2>실제 앱–서버 API 동작 영상 ②</h2>
+
+      <div class="video-single">
+        <video
+          controls
+          preload="metadata"
+          playsinline
+          src="video/sharefit_demo2.mp4"
+        ></video>
+      </div>
+    </section>
+
+    <!-- 실행 영상 3 -->
+    <section class="slide">
+      <div class="eyebrow">05 · 기능 실행 영상</div>
+      <h2>실제 앱–서버 API 동작 영상 ③</h2>
+
+      <div class="video-single">
+        <video
+          controls
+          preload="metadata"
+          playsinline
+          src="video/sharefit_demo3.mp4"
+        ></video>
+      </div>
+    </section>
+    <div class="progress" id="progress"></div>
+    <nav class="foot">
+      <span class="home">ShareFit · Flutter–Spring Boot API 연동</span
+      ><button id="prev">← 이전</button><span id="counter" class="count"></span
+      ><button id="next">다음 →</button>
+    </nav>
+    <script>
+      const slides = [...document.querySelectorAll(".slide")];
+      let index = 0;
+      const count = document.getElementById("counter"),
+        bar = document.getElementById("progress");
+      function show(n) {
+        index = Math.max(0, Math.min(slides.length - 1, n));
+        slides.forEach((s, i) => s.classList.toggle("active", i === index));
+        count.textContent = index + 1 + " / " + slides.length;
+        bar.style.width = ((index + 1) / slides.length) * 100 + "%";
+        slides[index].scrollTop = 0;
+      }
+      document
+        .getElementById("prev")
+        .addEventListener("click", () => show(index - 1));
+      document
+        .getElementById("next")
+        .addEventListener("click", () => show(index + 1));
+      document.addEventListener("keydown", (e) => {
+        if (e.target instanceof HTMLVideoElement) return;
+        if (["ArrowRight", "PageDown"].includes(e.key)) show(index + 1);
+        if (["ArrowLeft", "PageUp"].includes(e.key)) show(index - 1);
+      });
+      show(0);
+    </script>
+  </body>
+</html>
