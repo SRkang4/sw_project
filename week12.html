@@ -1,0 +1,1053 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width,initial-scale=1" name="viewport" />
+    <title>ShareFit 12주차 발표 · API 연동 및 루틴·헬스 테스트</title>
+    <style>
+      :root {
+        --blue: #5267e8;
+        --ink: #121622;
+        --muted: #606a7a;
+        --line: #dfe4ed;
+        --soft: #f5f7fb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Pretendard",
+          "Apple SD Gothic Neo", sans-serif;
+        color: var(--ink);
+        background: #edf0f6;
+      }
+      body {
+        overflow: hidden;
+      }
+      .slide {
+        display: none;
+        width: 100vw;
+        height: 100vh;
+        padding: 4vh 5vw 9vh;
+        background: white;
+        overflow: hidden;
+        flex-direction: column;
+      }
+      .slide.active {
+        display: flex;
+      }
+      .kicker {
+        font-weight: 850;
+        color: var(--blue);
+        font-size: clamp(12px, 1.2vw, 17px);
+        margin-bottom: 1.2vh;
+        letter-spacing: 0.03em;
+      }
+      h2 {
+        font-size: clamp(25px, 2.7vw, 43px);
+        letter-spacing: -0.04em;
+        margin: 0 0 2.4vh;
+        line-height: 1.2;
+      }
+      h1 {
+        font-size: clamp(48px, 5.7vw, 90px);
+        line-height: 1.12;
+        letter-spacing: -0.05em;
+        margin: 0 0 14px;
+      }
+      h1 em {
+        color: var(--blue);
+        font-style: normal;
+      }
+      .body {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .layout {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        gap: 2.8vw;
+      }
+      .leftphone {
+        grid-template-columns: minmax(230px, 34%) minmax(0, 1fr);
+      }
+      .twophone {
+        grid-template-columns: minmax(170px, 25%) minmax(170px, 25%) minmax(
+            0,
+            1fr
+          );
+      }
+      .media {
+        min-height: 0;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+      }
+      .fig {
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-height: 0;
+        min-width: 0;
+      }
+      .fig img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        min-height: 0;
+      }
+      .fig figcaption {
+        text-align: center;
+        color: var(--muted);
+        font-size: clamp(10px, 0.93vw, 14px);
+        font-weight: 650;
+      }
+      .phone {
+        height: 100%;
+        max-width: 100%;
+      }
+      .phone img {
+        max-width: 100%;
+        max-height: 100%;
+        border-radius: 12px;
+      }
+      .db {
+        height: auto;
+        width: 100%;
+        align-items: stretch;
+      }
+      .db img {
+        height: auto;
+        max-height: 20vh;
+        object-fit: contain;
+        object-position: left center;
+        border-radius: 8px;
+        background: #161616;
+      }
+      .db figcaption {
+        text-align: left;
+      }
+      .copy {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 2vh;
+        min-width: 0;
+      }
+      .feature {
+        background: var(--soft);
+        padding: clamp(13px, 1.7vw, 27px);
+        border-radius: 16px;
+      }
+      .feature b {
+        font-size: clamp(16px, 1.5vw, 23px);
+      }
+      .feature p {
+        margin: 9px 0 0;
+        color: #3d4656;
+        font-size: clamp(13px, 1.25vw, 18px);
+        line-height: 1.6;
+      }
+      .feature code {
+        font-size: clamp(11px, 1vw, 15px);
+        overflow-wrap: anywhere;
+      }
+      .note,
+      .footnote {
+        background: #f4f6ff;
+        border-left: 5px solid var(--blue);
+        padding: 16px 19px;
+        border-radius: 8px;
+        font-size: clamp(13px, 1.25vw, 18px);
+        line-height: 1.55;
+      }
+      .dbarea {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5vh;
+        min-height: 0;
+      }
+      .three {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-top: 3vh;
+      }
+      .three.tight {
+        margin: 0;
+      }
+      .metric {
+        padding: clamp(14px, 1.8vw, 27px);
+        background: #f1f4ff;
+        border-radius: 17px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .metric b {
+        color: var(--blue);
+        font-size: clamp(20px, 2vw, 34px);
+        letter-spacing: -0.04em;
+      }
+      .metric span {
+        color: #4b5669;
+        font-size: clamp(12px, 1.05vw, 17px);
+        line-height: 1.4;
+      }
+      .cover {
+        justify-content: center;
+      }
+      .cover .intro {
+        padding-top: 6vh;
+      }
+      .pill {
+        display: inline-block;
+        background: #eef1ff;
+        color: var(--blue);
+        border-radius: 20px;
+        padding: 9px 18px;
+        font-weight: 900;
+        margin-bottom: 2vh;
+      }
+      .intro p {
+        font-size: clamp(18px, 1.6vw, 25px);
+        color: var(--muted);
+      }
+      .notice {
+        margin-top: auto;
+        background: #f5f7fb;
+        border-radius: 12px;
+        padding: 18px 22px;
+        color: #374359;
+        font-size: clamp(14px, 1.25vw, 19px);
+      }
+      .architecture {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 2vw;
+        margin: 7vh 0 6vh;
+      }
+      .arch {
+        width: 25%;
+        min-height: 23vh;
+        background: #f5f7fc;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        padding: 2vw;
+        text-align: center;
+      }
+      .arch small {
+        display: block;
+        color: var(--blue);
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+      .arch strong {
+        display: block;
+        font-size: clamp(20px, 2.1vw, 31px);
+      }
+      .arch p {
+        color: var(--muted);
+        font-size: clamp(12px, 1.1vw, 16px);
+        line-height: 1.5;
+      }
+      .arr {
+        font-size: 38px;
+        color: var(--blue);
+      }
+      .split-text {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        margin-bottom: 3vh;
+      }
+      .split-text > div {
+        background: #f6f8fc;
+        border-radius: 14px;
+        padding: 15px 25px;
+      }
+      .split-text h3 {
+        margin: 0 0 7px;
+        font-size: 22px;
+      }
+      .split-text p {
+        font-size: clamp(13px, 1.22vw, 18px);
+        line-height: 1.5;
+        margin: 0;
+      }
+      .triptych {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2.8vw;
+        justify-items: center;
+      }
+      .triptych .phone {
+        max-height: 100%;
+        max-width: 100%;
+      }
+      .triptych + .footnote {
+        margin-top: 2vh;
+      }
+      .buggrid {
+        display: grid;
+        grid-template-columns: 40% 1fr;
+        gap: 3vw;
+        align-items: center;
+        flex: 1;
+      }
+      .bug {
+        width: 100%;
+        height: auto;
+      }
+      .bug img {
+        height: auto;
+        max-height: 30vh;
+        object-fit: contain;
+      }
+      .mini {
+        font-size: clamp(12px, 1.1vw, 16px);
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .bugcontent {
+        display: flex;
+        flex-direction: column;
+        gap: 2vh;
+      }
+      .ok {
+        padding: 19px;
+        border: 1px solid #cbd5fd;
+        background: #f1f4ff;
+        color: #364cc5;
+        border-radius: 13px;
+        font-weight: 750;
+        font-size: clamp(13px, 1.3vw, 19px);
+        line-height: 1.5;
+      }
+      .plan {
+        display: flex;
+        flex-direction: column;
+        gap: 2vh;
+        margin: 3vh auto;
+        width: min(100%, 1050px);
+      }
+      .planitem {
+        display: flex;
+        align-items: start;
+        gap: 24px;
+        background: #f6f8fc;
+        border-radius: 17px;
+        padding: 20px 25px;
+      }
+      .planitem i {
+        font-size: 30px;
+        font-weight: 900;
+        color: var(--blue);
+        font-style: normal;
+      }
+      .planitem h3 {
+        margin: 0 0 9px;
+        font-size: clamp(19px, 1.8vw, 28px);
+      }
+      .planitem p {
+        margin: 0;
+        color: var(--muted);
+        font-size: clamp(13px, 1.2vw, 18px);
+      }
+      .toolbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 57px;
+        background: #fff;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        align-items: center;
+        z-index: 100;
+      }
+      .toolbar button {
+        border: 1px solid var(--line);
+        padding: 8px 16px;
+        border-radius: 9px;
+        background: #fff;
+        cursor: pointer;
+        font-weight: 700;
+      }
+      .counter {
+        color: var(--muted);
+        font-size: 14px;
+        min-width: 68px;
+        text-align: center;
+      }
+      .progress {
+        position: fixed;
+        bottom: 57px;
+        left: 0;
+        height: 3px;
+        background: var(--blue);
+        transition: width 0.2s;
+      }
+      .topline {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 5px;
+        background: var(--blue);
+      }
+      @media (max-width: 800px) {
+        .slide {
+          padding: 30px 24px 75px;
+        }
+        .leftphone {
+          grid-template-columns: 37% 1fr;
+        }
+        .twophone {
+          grid-template-columns: 25% 25% 1fr;
+        }
+        .feature {
+          padding: 12px;
+        }
+        .feature p {
+          font-size: 11px;
+        }
+        .db img {
+          max-height: 17vh;
+        }
+        .triptych {
+          gap: 10px;
+        }
+      }
+
+      /* 12주차 추가: 원인/해결 코드 및 시연 영상 */
+      .codegrid {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 2vw;
+        align-items: stretch;
+      }
+      .codebox {
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        border: 1px solid var(--line);
+        border-radius: 17px;
+        overflow: hidden;
+        background: #f8faff;
+      }
+      .codehead {
+        background: #edf0fb;
+        padding: 14px 20px;
+        font-size: clamp(15px, 1.25vw, 21px);
+        font-weight: 850;
+      }
+      .codebox pre {
+        margin: 0;
+        padding: clamp(14px, 1.35vw, 22px);
+        font-size: clamp(12px, 1.02vw, 16px);
+        line-height: 1.65;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        overflow: auto;
+        flex: 1;
+        color: #263449;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      }
+      .codefoot {
+        padding: 12px 18px;
+        background: #f0f3fc;
+        color: #495674;
+        font-size: clamp(12px, 1vw, 15px);
+        line-height: 1.5;
+      }
+      .codebottom {
+        margin-top: 2vh;
+        background: #f1f4ff;
+        padding: 15px 19px;
+        border-radius: 11px;
+        font-size: clamp(14px, 1.16vw, 18px);
+      }
+      .videoarea {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+        align-items: center;
+        justify-content: center;
+        gap: 3vw;
+      }
+      .videoframe {
+        height: min(69vh, 800px);
+        aspect-ratio: 9/16;
+        max-width: 70vw;
+        background: #13151d;
+        border-radius: 23px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        box-shadow: 0 14px 50px #1a2f6326;
+      }
+      .videoframe video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+      .videotext {
+        max-width: 390px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .videoerror {
+        font-size: clamp(12px, 0.95vw, 15px);
+        color: var(--muted);
+      }
+      @media (max-width: 800px) {
+        .codegrid {
+          grid-template-columns: 1fr;
+        }
+        .codebox pre {
+          font-size: 11px;
+        }
+        .videotext {
+          max-width: 36vw;
+        }
+        .videoframe {
+          height: 58vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="topline"></div>
+    <section class="slide">
+      <div class="kicker">12주차 · 개발 현황</div>
+      <h2>Flutter API 연동 완료 · 실제 기능 검증 시작</h2>
+      <div class="body cover">
+        <div class="intro">
+          <span class="pill">ShareFit</span>
+          <h1>운동 데이터 연동과<br /><em>루틴 기능 검증</em></h1>
+          <p>Flutter ↔ Spring Boot ↔ MySQL</p>
+        </div>
+        <div class="three">
+          <div class="metric">
+            <b>API 연동</b><span>핵심 기능 연결 완료</span>
+          </div>
+          <div class="metric">
+            <b>루틴</b><span>신규 화면 · 저장/조회/복사 확인</span>
+          </div>
+          <div class="metric"><b>헬스</b><span>기록·통계 반영 확인</span></div>
+        </div>
+        <div class="notice">
+          러닝은 API 코드 연결까지 진행 · 실제 기능 테스트는 다음 주 예정
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 아키텍처</div>
+      <h2>운동 데이터 저장 경로 전환</h2>
+      <div class="body">
+        <div class="architecture">
+          <div class="arch">
+            <small>APP</small><strong>Flutter</strong>
+            <p>운동 · 루틴 · 친구 화면</p>
+          </div>
+          <span class="arr">→</span>
+          <div class="arch">
+            <small>API</small><strong>Spring Boot</strong>
+            <p>Firebase ID Token 검증<br />운동 데이터 처리</p>
+          </div>
+          <span class="arr">→</span>
+          <div class="arch">
+            <small>DB</small><strong>MySQL</strong>
+            <p>운동 · 세트 · 루틴 저장</p>
+          </div>
+        </div>
+        <div class="split-text">
+          <div>
+            <h3>기존</h3>
+            <p>Flutter에서 Firestore 운동 데이터를 직접 조회·저장·집계함</p>
+          </div>
+          <div>
+            <h3>현재</h3>
+            <p>운동 데이터는 Spring Boot API를 통해 MySQL에서 처리함</p>
+          </div>
+        </div>
+        <p class="note">
+          사용자·친구·운동·헬스·러닝·랭킹·루틴 API 연결 완료. Firebase 인증·사진
+          Storage·FCM은 유지함.
+        </p>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 루틴 화면 추가</div>
+      <h2>없던 루틴 관리 화면을 새로 구성</h2>
+      <div class="body">
+        <div class="layout leftphone">
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="루틴 1 / 3분할 및 Day 관리 화면"
+                loading="lazy"
+                src="image/routine_screen.png"
+              />
+              <figcaption>루틴 1 / 3분할 및 Day 관리 화면</figcaption>
+            </figure>
+          </div>
+          <div class="copy">
+            <div class="feature">
+              <b>루틴 관리</b>
+              <p>루틴명과 분할 수 설정 · Day별 부위/종목/세트 지정</p>
+            </div>
+            <div class="feature">
+              <b>운동 준비에서 불러오기</b>
+              <p>저장한 루틴과 Day를 선택해 운동 종목을 채움</p>
+            </div>
+            <div class="feature">
+              <b>시작 전 편집</b>
+              <p>중량·횟수·세트를 변경해도 원본 루틴은 유지됨</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 루틴 DB 저장</div>
+      <h2>루틴 저장 결과를 MySQL에서 확인</h2>
+      <div class="body">
+        <div class="layout leftphone">
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="루틴 1 · Push 선택 후 운동 준비"
+                loading="lazy"
+                src="image/workout_routine_prepare.png"
+              />
+              <figcaption>루틴 1 · Push 선택 후 운동 준비</figcaption>
+            </figure>
+          </div>
+          <div class="copy">
+            <div class="dbarea">
+              <figure class="fig db">
+                <img
+                  alt="routines: routine_id=1, split_count=3"
+                  loading="lazy"
+                  src="image/db_routines.png"
+                />
+                <figcaption>routines: routine_id=1, split_count=3</figcaption>
+              </figure>
+              <figure class="fig db">
+                <img
+                  alt="routine_days: Push · Pull · leg"
+                  loading="lazy"
+                  src="image/db_routine_days.png"
+                />
+                <figcaption>routine_days: Push · Pull · leg</figcaption>
+              </figure>
+            </div>
+            <p class="note">
+              루틴 생성·수정·저장·불러오기 동작 확인. 루틴과 Day 정보가 각각
+              테이블에 저장됨.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 친구 루틴</div>
+      <h2>친구 루틴 조회 및 내 루틴 복사 확인</h2>
+      <div class="body">
+        <div class="layout twophone">
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="친구 프로필에서 저장된 루틴 확인"
+                loading="lazy"
+                src="image/friend_routine_profile.png"
+              />
+              <figcaption>친구 프로필에서 저장된 루틴 확인</figcaption>
+            </figure>
+          </div>
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="Day별 종목·세트 조회 / 내 루틴에 복사"
+                loading="lazy"
+                src="image/friend_routine_details.png"
+              />
+              <figcaption>Day별 종목·세트 조회 / 내 루틴에 복사</figcaption>
+            </figure>
+          </div>
+          <div class="copy">
+            <div class="feature">
+              <b>조회</b>
+              <p>친구 프로필에서 루틴명·분할 수·Day별 운동 확인함</p>
+            </div>
+            <div class="feature">
+              <b>복사</b>
+              <p>친구 루틴을 내 루틴에 복사하는 기능 정상 동작 확인함</p>
+            </div>
+            <div class="feature">
+              <b>서버 연동</b>
+              <p>
+                <code>GET /friends/{friendId}/routines</code><br /><code
+                  >POST /friends/{friendId}/routines/{routineId}/copy</code
+                >
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 헬스 기록</div>
+      <h2>운동 완료 → 기록 상세 → MySQL 저장</h2>
+      <div class="body">
+        <div class="layout leftphone">
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="운동 완료 기록: 7종목 · 11세트 · 2,200kg"
+                loading="lazy"
+                src="image/strength_detail.png"
+              />
+              <figcaption>운동 완료 기록: 7종목 · 11세트 · 2,200kg</figcaption>
+            </figure>
+          </div>
+          <div class="copy">
+            <div class="three tight">
+              <div class="metric"><b>7</b><span>운동 종목</span></div>
+              <div class="metric"><b>11</b><span>완료 세트</span></div>
+              <div class="metric"><b>2,200kg</b><span>총 볼륨</span></div>
+            </div>
+            <div class="dbarea">
+              <figure class="fig db">
+                <img
+                  alt="strength_exercises: workout_id=4 · 종목 7개 저장"
+                  loading="lazy"
+                  src="image/db_strength_exercises.png"
+                />
+                <figcaption>
+                  strength_exercises: workout_id=4 · 종목 7개 저장
+                </figcaption>
+              </figure>
+              <figure class="fig db">
+                <img
+                  alt="workouts: STRENGTH · COMPLETED"
+                  loading="lazy"
+                  src="image/db_workouts.png"
+                />
+                <figcaption>workouts: STRENGTH · COMPLETED</figcaption>
+              </figure>
+            </div>
+            <p class="note">
+              운동 기록 생성·완료 및 종목별 세트 조회 확인. 화면과 DB 저장 결과
+              비교함.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 데이터 활용</div>
+      <h2>한 번 저장한 기록을 여러 화면에서 조회</h2>
+      <div class="body">
+        <div class="triptych">
+          <figure class="fig phone">
+            <img
+              alt="오늘 운동 완료 카드"
+              loading="lazy"
+              src="image/workout_completed_card.png"
+            />
+            <figcaption>오늘 운동 완료 카드</figcaption>
+          </figure>
+          <figure class="fig phone">
+            <img
+              alt="주간 요약 · 운동 캘린더"
+              loading="lazy"
+              src="image/workout_calendar.png"
+            />
+            <figcaption>주간 요약 · 운동 캘린더</figcaption>
+          </figure>
+          <figure class="fig phone">
+            <img
+              alt="월별 볼륨 · 부위별 통계"
+              loading="lazy"
+              src="image/workout_stats.png"
+            />
+            <figcaption>월별 볼륨 · 부위별 통계</figcaption>
+          </figure>
+        </div>
+        <div class="footnote">
+          운동 완료 후 홈·기록·요약·캘린더·통계 화면에 저장된 데이터 반영 확인함
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 친구 상태</div>
+      <h2>친구의 운동 완료 상태도 반영</h2>
+      <div class="body">
+        <div class="layout leftphone">
+          <div class="media">
+            <figure class="fig phone">
+              <img
+                alt="친구 화면에서 운동 완료 사용자 1명 표시"
+                loading="lazy"
+                src="image/friend_workout_status.png"
+              />
+              <figcaption>친구 화면에서 운동 완료 사용자 1명 표시</figcaption>
+            </figure>
+          </div>
+          <div class="copy">
+            <div class="feature">
+              <b>운동 중 / 완료 / 미실시</b>
+              <p>친구 상태별로 목록 구분함</p>
+            </div>
+            <div class="feature">
+              <b>운동 완료 표시</b>
+              <p>친구 <strong>kang</strong>의 헬스 완료 내역이 홈에 반영됨</p>
+            </div>
+            <div class="feature">
+              <b>검증 범위</b>
+              <p>
+                현재 헬스 완료 기록에 대한 상태 반영 확인함. 러닝 상태는 추후
+                테스트 예정
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 문제 해결</div>
+      <h2>운동 완료 기록에 부위가 표시되지 않던 문제</h2>
+      <div class="body">
+        <div class="buggrid">
+          <div>
+            <figure class="fig bug">
+              <img
+                alt="수정 전: 운동 부위 미설정"
+                loading="lazy"
+                src="image/body_part_missing_before.png"
+              />
+              <figcaption>수정 전: 운동 부위 미설정</figcaption>
+            </figure>
+            <p class="mini">
+              기록에는 종목·세트·볼륨은 있으나 부위가 비어 있었음
+            </p>
+          </div>
+          <div class="bugcontent">
+            <div class="feature">
+              <b>원인</b>
+              <p>
+                Spring Boot 상세 조회 API에서 부위 정보 반환 누락<br />Flutter
+                기록 모델이 <code>bodyParts: []</code>로 고정됨
+              </p>
+            </div>
+            <div class="feature">
+              <b>수정</b>
+              <p>
+                완료한 운동 종목 ID → 종목별 부위 조회 → API 응답 → Flutter 기록
+                모델로 전달함
+              </p>
+            </div>
+            <div class="ok">
+              서버 재시작 · Hot Restart 후 기존 기록에서도 부위 표시 정상 동작
+              확인함
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 오류 원인 코드</div>
+      <h2>운동 부위 미표시 · 수정 전 코드</h2>
+      <div class="body">
+        <div class="codegrid">
+          <div class="codebox">
+            <div class="codehead">Spring Boot · 수정 전</div>
+            <pre><code>return new Detail(
+    id, w.getWorkoutType(),
+    w.getStatus(),
+    w.getStartedAt(),
+    w.getEndedAt(),
+    w.getDurationSeconds(),
+    photo,
+    records.strength(id));</code></pre>
+            <div class="codefoot">
+              상세 API 응답에 운동 부위가 포함되지 않았음
+            </div>
+          </div>
+          <div class="codebox">
+            <div class="codehead">Flutter · 수정 전</div>
+            <pre><code>strength: StrengthWorkoutData(
+  bodyParts: const [],
+  exercises: exercises,
+  completedSetCount: count,
+  totalVolumeKg: volume,
+),</code></pre>
+            <div class="codefoot">
+              bodyParts를 빈 목록으로 고정해 '미설정' 표시됨
+            </div>
+          </div>
+        </div>
+        <div class="codebottom">
+          MySQL에는 운동 종목과 완료 세트가 정상 저장됨 → 저장 문제보다
+          <b>조회 응답 및 변환 문제</b>였음
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 오류 해결 코드</div>
+      <h2>완료한 종목으로 부위 조회 · API 응답 연결</h2>
+      <div class="body">
+        <div class="codegrid">
+          <div class="codebox">
+            <div class="codehead">Spring Boot · 수정 후</div>
+            <pre><code>// 상세 응답에 완료한 부위를 추가
+return new Detail(
+    id, w.getWorkoutType(),
+    w.getStatus(),
+    w.getStartedAt(),
+    w.getEndedAt(),
+    w.getDurationSeconds(),
+    photo,
+    strength.completedBodyParts(id),
+    records.strength(id));</code></pre>
+            <div class="codefoot">
+              완료한 세트 → 운동 종목 → 종목의 부위를 조회해 응답에 추가
+            </div>
+          </div>
+          <div class="codebox">
+            <div class="codehead">Flutter · 수정 후</div>
+            <pre><code>strength: StrengthWorkoutData(
+  bodyParts: List&lt;String&gt;.from(
+    data['bodyParts'] ??
+        const &lt;String&gt;[]
+  ),
+  exercises: exercises,
+  completedSetCount: count,
+  totalVolumeKg: volume,
+),</code></pre>
+            <div class="codefoot">
+              API의 bodyParts를 기록 모델에 연결해 홈·상세에 표시
+            </div>
+          </div>
+        </div>
+        <div class="codebottom">
+          <b>별도 DB 컬럼 추가 없음.</b> 기존 strength_sets → strength_exercises
+          → exercises → body_parts를 조회함. 기존 기록에도 정상 적용 확인.
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 운동 시연 영상</div>
+      <h2>헬스 운동 기능 시연</h2>
+      <div class="body">
+        <div class="videoarea">
+          <div class="videoframe">
+            <video
+              controls=""
+              playsinline=""
+              preload="metadata"
+              src="video/work.mp4"
+            >
+            </video>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="slide">
+      <div class="kicker">12주차 · 다음 주 계획</div>
+      <h2>13주차 · 러닝 기능 테스트 및 코스 그리기</h2>
+      <div class="body">
+        <div class="plan">
+          <div class="planitem">
+            <i>01</i>
+            <div>
+              <h3>러닝 기능 통합 테스트</h3>
+              <p>
+                러닝 시작 → GPS 좌표 저장 → 일시정지/재개 → 완료까지 실제 확인
+                예정
+              </p>
+            </div>
+          </div>
+          <div class="planitem">
+            <i>02</i>
+            <div>
+              <h3>러닝 코스 지도 표시</h3>
+              <p>
+                저장된 GPS 좌표로 지도 위 경로를 선으로 그리는 기능 추가 예정
+              </p>
+            </div>
+          </div>
+          <div class="planitem">
+            <i>03</i>
+            <div>
+              <h3>운동 기록과 상세 연결</h3>
+              <p>완료한 러닝 기록에서 거리·시간·코스 조회 확인 예정</p>
+            </div>
+          </div>
+        </div>
+        <div class="notice">
+          이번 주: 헬스·루틴 기능 검증 완료 / 다음 주: 러닝 기능 검증 집중
+        </div>
+      </div>
+    </section>
+    <div class="progress" id="progress"></div>
+    <nav class="toolbar">
+      <button onclick="go(0)">처음</button
+      ><button onclick="go(n - 1)">← 이전</button
+      ><span class="counter" id="counter"></span
+      ><button onclick="go(n + 1)">다음 →</button
+      ><button onclick="document.documentElement.requestFullscreen?.()">
+        전체 화면
+      </button>
+    </nav>
+    <script>
+      let n = 0;
+      const slides = [...document.querySelectorAll(".slide")];
+      function go(i) {
+        n = Math.max(0, Math.min(slides.length - 1, i));
+        slides.forEach((s, j) => {
+          s.classList.toggle("active", j === n);
+          if (j !== n) s.querySelectorAll("video").forEach((v) => v.pause());
+        });
+        document.getElementById("counter").textContent =
+          `${n + 1} / ${slides.length}`;
+        document.getElementById("progress").style.width =
+          ((n + 1) / slides.length) * 100 + "%";
+      }
+      document.addEventListener("keydown", (e) => {
+        if (["ArrowRight", "ArrowDown", " ", "PageDown"].includes(e.key)) {
+          e.preventDefault();
+          go(n + 1);
+        }
+        if (["ArrowLeft", "ArrowUp", "PageUp"].includes(e.key)) {
+          e.preventDefault();
+          go(n - 1);
+        }
+        if (e.key === "Home") go(0);
+        if (e.key === "End") go(slides.length - 1);
+      });
+      go(0);
+    </script>
+  </body>
+</html>
